@@ -1,1 +1,1 @@
-docsify serve ../algorithm
+docsify serve ../cs-notes
