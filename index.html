@@ -7,18 +7,32 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
     <meta name="description" content="Description">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <!-- 主题 -->
     <!--    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">-->
+    <!--    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">-->
     <link rel="stylesheet" href="//cdn.zxdmy.com/libs/docsify/vue.css">
+    <!-- 代码宽显示行号 -->
+    <!--    <link rel="stylesheet" href="//cdn.zxdmy.com/libs/docsify/plugins/codeLineNum.css">-->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"/>
+
     <style>
+        /* 设置全局默认字体大小 */
         body {
             font-size: 16px;
         }
 
+        /* 去除超链接的下划线 */
         a {
             text-decoration: none;
         }
+
         a:hover {
             text-decoration: none;
+        }
+
+        /* 去除代码块的横线 */
+        .markdown-section tr {
+            border-top: 0;
         }
     </style>
     <script>
@@ -75,6 +89,16 @@
             color: 'rgb(90,90,90)',
             language: 'chinese'
         },
+        // 复制代码按钮
+        copyCode: {
+            buttonText: '复制代码',
+            errorText: '复制失败',
+            successText: '已复制'
+        },
+        // 代码块显示行号
+        codeLineNum: {
+            blacklist: ['text']
+        },
         // 开发插件
         plugins: [
             function (hook) {
@@ -97,6 +121,8 @@
 <!-- Docsify v4 -->
 <!--<script src="//cdn.jsdelivr.net/npm/docsify@4"></script>-->
 <script src="//cdn.zxdmy.com/libs/docsify/docsify@4"></script>
+<!--LaTeX表达式插件-->
+<script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
 <!-- 表情 -->
 <!--<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>-->
 <script src="//cdn.zxdmy.com/libs/docsify/plugins/emoji.min.js"></script>
@@ -106,12 +132,11 @@
 <!-- 图片缩放 -->
 <!--<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>-->
 <script src="//cdn.zxdmy.com/libs/docsify/plugins/zoom-image.min.js"></script>
-<!-- 复制代码 -->
-<!--<script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>-->
-<script src="//cdn.zxdmy.com/libs/docsify/plugins/docsify-copy-code.min.js"></script>
 <!-- 外链脚本 -->
 <!--<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/external-script.min.js"></script>-->
 <script src="//cdn.zxdmy.com/libs/docsify/plugins/external-script.min.js"></script>
+<!--代码块显示行号-->
+<!--<script src="//cdn.zxdmy.com/libs/docsify/plugins/codeLineNum.min.js"></script>-->
 <!--代码高亮-->
 <!--<script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>-->
 <!--<script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-markdown.min.js"></script>-->
@@ -123,11 +148,15 @@
 <script src="//cdn.zxdmy.com/libs/docsify/prismjs/prism-markdown.min.js"></script>
 <script src="//cdn.zxdmy.com/libs/docsify/prismjs/prism-nginx.min.js"></script>
 <script src="//cdn.zxdmy.com/libs/docsify/prismjs/prism-yaml.min.js"></script>
+<!-- 复制代码 -->
+<!--<script src="//cdn.jsdelivr.net/npm/docsify-copy-code/dist/docsify-copy-code.min.js"></script>-->
+<script src="//cdn.zxdmy.com/libs/docsify/plugins/docsify-copy-code.min.js"></script>
 <!--分页-->
 <!--<script src="//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js"></script>-->
 <script src="//cdn.zxdmy.com/libs/docsify/plugins/docsify-pagination.min.js"></script>
 <!--字数统计-->
 <script src="//cdn.zxdmy.com/libs/docsify/plugins/countable.js"></script>
+
 
 </body>
 </html>
