@@ -22,12 +22,12 @@
 
 + **:ledger: 数据库笔记**
 
-    + [:mag: SQL 必知必会](/后端/设计模式/README.md)
+    + [:mag: SQL 必知必会](/数据库/SQL必知必会/)
 
 + **:blue_book: 计算机基础**
 
-    + 操作系统
-    + 计算机网络
+    + :computer: 操作系统
+    + :globe_with_meridians: 计算机网络
 
 + **:books: 其他**
 
