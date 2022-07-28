@@ -1,5 +1,3 @@
-# 1-1 Java基础
-
 ## 1、Java 基础知识
 
 ### 1.1 Java语言特点
@@ -161,26 +159,444 @@ StringBuilder sb2 = new StringBuilder("HelloWorld");
 - 基本数据类型的**局部变量存放在 Java 虚拟机栈中的局部变量表中**，基本数据类型的**成员变量（未被 `static` 修饰 ）存放在 Java 虚拟机的堆中**。包装类型属于对象类型，我们知道几乎所有对象实例都存在于堆中。
 - 相比于对象类型， 基本数据类型占用的空间非常小。
 
-### 3.3 包装类型的缓存机制与比较
-
-
-
-
-
-### 1.3 包装类型的常量池
+### 3.3 包装类型的缓存机制（常量池）与比较
 
 Java 基本类型的包装类的大部分都实现了常量池技术。
 
-`Byte`,`Short`,`Integer`,`Long` 这 4 种包装类默认创建了数值 **[-128，127]** 的相应类型的缓存数据
+`Byte`、`Short`、`Integer`、`Long` 这 4 种包装类默认创建了数值 **[-128，127]** 的相应类型的缓存数据，`Character` 创建了数值在 **[0,127]** 范围的缓存数据，`Boolean` 直接返回 `True` or `False`。
 
-`Character` 创建了数值在 **[0,127]** 范围的缓存数据
+如果超出对应范围仍然会去创建新的对象，缓存的范围区间的大小只是在性能和资源之间的权衡。
 
-`Boolean` 直接返回 `True` or `False`。
+所以 `==` 比较大小，有问题，强制使用 `equals` 。
 
-### 1.4 静态方法为什么不能调用非静态成员?
+```java
+Integer a = 33;
+Integer b1 = 33;
+Integer b2 = new Integer(33);
+System.out.println(a == b1); // true
+System.out.println(a == b2); // false
+Integer c = 1024;
+Integer d = 1024;
+System.out.println(c == d); // false
+System.out.println(c.equals(d)); // true
 
-1. 静态方法是属于类的，在类加载的时候就会分配内存，可以通过类名直接访问。而非静态成员属于实例对象，只有在对象实例化之后才存在，需要通过类的实例对象去访问。
-2. 在类的非静态成员不存在的时候静态成员就已经存在了，此时调用在内存中还不存在的非静态成员，属于非法操作。
+Float i1 = 333f;
+Float i2 = 333f;
+System.out.println(i1 == i2); // false
+
+Double i3 = 1.2;
+Double i4 = 1.2;
+System.out.println(i3 == i4); // false
+```
+
+下图是阿里巴巴Java开发手册给出的说明。
+
+![image-20220728142703256](1-1、Java 基础.assets/image-20220728142703256.png)
+
+### 3.4 自动装箱与拆箱
+
+- **装箱**：将`基本类型`用它们对应的`引用类型`包装起来；调用了包装类的`valueOf()`方法，
+- **拆箱**：将`包装类型`转换为`基本数据类型`；调用了 `xxxValue()`方法。
+
+```java
+Integer i = 10; //装箱
+int n = i;   	//拆箱
+```
+
+即：
+
+- `Integer i = 10` 等价于 `Integer i = Integer.valueOf(10)`
+- `int n = i` 等价于 `int n = i.intValue()`;
+
+> 频繁拆装箱会严重影响系统的性能，应该尽量避免不必要的拆装箱操作。
+
+### 3.5 浮点运算精度问题
+
+由于计算机保存浮点数的机制问题，其使用二进制保存数字，宽度有限，无限循环小数只能被截断，所以导致小数精度丢失。
+
+示例：
+
+```java
+float a = 2.0f - 1.9f;
+float b = 1.8f - 1.7f;
+System.out.println(a);		// 0.100000024
+System.out.println(b);		// 0.099999905
+System.out.println(a == b);	// false
+```
+
+解决精度丢失问题，可以使用`BigDecimal` 实现对浮点数的运算，不会造成精度丢失。
+
+示例：
+
+```java
+BigDecimal a = new BigDecimal("1.0");
+BigDecimal b = new BigDecimal("0.9");
+BigDecimal c = new BigDecimal("0.8");
+
+BigDecimal x = a.subtract(b);
+BigDecimal y = b.subtract(c);
+
+System.out.println(x); /* 0.1 */
+System.out.println(y); /* 0.1 */
+System.out.println(Objects.equals(x, y)); /* true */
+```
+
+> BigDecimal 传入的值，建议使用 String 类型。
+
+### 3.6 大数表示
+
+超过 `Long.MAX_VALUE` 的数，可以使用 `BigInteger` 来表示运算。但运算效率相对较低。
+
+> `BigInteger` 内部使用 `int[]` 数组来存储任意大小的整形数据。
+
+## 4、Java 常用对象（类）
+
+### 4.1 Object 类
+
+Object 类是一个特殊的类，是所有类的父类。它主要提供了以下 11 个方法：
+
+```java
+// native 方法，用于返回当前运行时对象的 Class 对象，使用了 final 关键字修饰，故不允许子类重写。
+public final native Class<?> getClass();
+    
+// native 方法，用于返回对象的哈希码，主要使用在哈希表中，比如 JDK 中的HashMap。
+public native int hashCode();
+
+// 用于比较 2 个对象的内存地址是否相等，String 类对该方法进行了重写以用于比较字符串的值是否相等。
+public boolean equals(Object obj);
+
+// naitive 方法，用于创建并返回当前对象的一份拷贝。
+protected native Object clone() throws CloneNotSupportedException;
+
+//返回类的名字实例的哈希码的 16 进制的字符串。建议 Object 所有的子类都重写这个方法。
+public String toString();
+
+// native 方法，并且不能重写。唤醒一个在此对象监视器上等待的线程(监视器相当于就是锁的概念)。如果有多个线程在等待只会任意唤醒一个。
+public final native void notify();
+
+// native 方法，并且不能重写。跟 notify 一样，唯一的区别就是会唤醒在此对象监视器上等待的所有线程，而不是一个线程。
+public final native void notifyAll();
+
+// native方法，并且不能重写。暂停线程的执行。注意：sleep 方法没有释放锁，而 wait 方法释放了锁 ，timeout 是等待时间。
+public final native void wait(long timeout) throws InterruptedException;
+
+// 多了 nanos 参数，这个参数表示额外时间（以毫微秒为单位，范围是 0-999999）。 所以超时的时间还需要加上 nanos 毫秒。。
+public final void wait(long timeout, int nanos) throws InterruptedException;
+
+// 跟之前的2个wait方法一样，只不过该方法一直等待，没有超时时间这个概念
+public final void wait() throws InterruptedException;
+
+// 实例被垃圾回收器回收的时候触发的操作
+protected void finalize() throws Throwable { };
+```
+
+#### hashcode()
+
+
+
+####  equals() 和 ==
+
+**`==`** 对于基本类型和引用类型的作用效果是不同的：
+
+- 对于基本数据类型来说，`==` 比较的是值。
+- 对于引用数据类型来说，`==` 比较的是对象的内存地址。
+
+> 因为 Java 只有 `值传递`，所以，对于 == 来说，不管是比较基本数据类型，还是引用数据类型的变量，其本质比较的都是值，只是 `引用类型变量存的值是对象的地址`。
+
+`equals()` 不能用于判断**基本数据类型**的变量，只能用来判断两个对象是否相等。
+
+`equals()` 方法存在两种使用情况：
+
+- **类没有重写 `equals()`方法** ：通过`equals()`比较该类的两个对象时，等价于通过“==”比较这两个对象，使用的默认是 `Object`类`equals()`方法。
+- **类重写了 `equals()`方法** ：一般都重写 `equals()`方法来比较两个对象中的**属性**是否相等；若它们的**属性相等**，则返回 true(即，认为这两个对象相等)。
+
+比如，String 类就对 equals() 方法进行了重写，以判断字符串的对象的值是否相同。
+
+### 4.2 String 类
+
+#### String 不可变
+
+因为：
+
++ `String` 类中使用 `final` 关键字修饰字符数组来保存字符串，导致其不能被继承，进而避免了子类破坏 `String` 不可变。
++ 保存字符串的数组被 `final` 修饰且为私有的，并且`String` 类没有提供/暴露修改这个字符串的方法。
+
+#### 字符串常量池
+
+**字符串常量池** 是 JVM 为了提升性能和减少内存消耗针对字符串（String 类）专门开辟的一块区域，主要目的是为了避免字符串的重复创建。
+
+示例如下：
+
+```java
+// 在堆中创建字符串对象”ab“
+// 将字符串对象”ab“的引用保存在字符串常量池中
+String a = "ab";
+// 直接返回字符串常量池中字符串对象”ab“的引用
+String b = "ab";
+System.out.println(a == b);// true
+```
+
+#### 字符串对象创建
+
+`String s = new String("abc")` 会创建几个字符串对象？会创建 1 或 2 个字符串对象。
+
+1. 如果字符串常量池中**不存在**字符串对象“abc”的引用，那么会在堆中创建 2 个字符串对象“abc”。
+
+```java
+String s = new String("abc");
+```
+
+1. 如果字符串常量池中**已存在**字符串对象“abc”的引用，则只会在堆中创建 1 个字符串对象“abc”。
+
+```java
+// 字符串常量池中已存在字符串对象“abc”的引用
+String s1 = "abc";
+// 下面这段代码只会在堆中创建 1 个字符串对象“abc”
+String s = new String("abc");
+```
+
+#### String.intern() 方法
+
+`String.intern()` 是一个 native（本地）方法，其作用是**将指定的字符串对象的引用保存在字符串常量池中**，可以简单分为两种情况：
+
+- 如果字符串常量池中保存了对应的字符串对象的引用，就直接返回该引用。
+- 如果字符串常量池中没有保存了对应的字符串对象的引用，那就在常量池中**创建一个指向该字符串对象的引用并返回**。
+
+示例：
+
+```java
+// 在堆中创建字符串对象”Java“
+// 将字符串对象”Java“的引用保存在字符串常量池中
+String s1 = "Java";
+// 直接返回字符串常量池中字符串对象”Java“对应的引用
+String s2 = s1.intern();
+// 会在堆中在单独创建一个字符串对象
+String s3 = new String("Java");
+// 直接返回字符串常量池中字符串对象”Java“对应的引用
+String s4 = s3.intern();
+// s1 和 s2 指向的是堆中的同一个对象
+System.out.println(s1 == s2); // true
+// s3 和 s4 指向的是堆中不同的对象
+System.out.println(s3 == s4); // false
+// s1 和 s4 指向的是堆中的同一个对象
+System.out.println(s1 == s4); //true
+```
+
+#### 常量折叠
+
+对于编译器可以确定值的字符串，也就是**常量字符串** ，jvm 会将其存入字符串常量池。并且，**字符串常量拼接得到的字符串常量**在编译阶段就已经被存放字符串常量池，这个得益于编译器的优化。
+
+比如，对于 `String str3 = "str" + "ing";` 编译器会给你优化成 `String str3 = "string";` 。
+
+> 并不是所有的常量都会进行折叠，**只有编译器在程序编译期就可以确定值的常量才可以**：
+>
+> - 基本数据类型( `byte`、`boolean`、`short`、`char`、`int`、`float`、`long`、`double`)以及字符串常量。
+> - `final` 修饰的基本数据类型和字符串变量
+> - 字符串通过 “+”拼接得到的字符串、基本数据类型之间算数运算（加减乘除）、基本数据类型的位运算（<<、>>、>>> ）
+
+#### String 的 + 运算
+
+Java 语言本身并不支持运算符重载，`+` 和 `+=` 是专门为 String 类重载过的运算符，也是 Java 中仅有的两个重载过的运算符。
+
+对于示例代码：
+
+```java
+String str1 = "he";
+String str2 = "llo";
+String str3 = "world";
+String str4 = str1 + str2 + str3;
+```
+
+**字符串对象** 通过 `+` 的形式拼接字符串，实际上是通过 `StringBuilder` 调用 `append()` 方法实现的，拼接完成之后调用 `toString()` 得到一个 `String` 对象 。
+
+即：
+
+```java
+String str4 = new StringBuilder().append(str1).append(str2).toString();
+```
+
+> 注意：在循环内使用 `+` 或 `+=` 进行字符串拼接，编译器会创建多个 `StringBuilder` 对象（即在循环内创建）。
+
+#### String.equals() 方法与字符串比较
+
+`String` 中的 `equals` 方法是被重写过的，比较的是 String 字符串的值是否相等。
+
+`Object` 的 `equals` 方法是比较的对象的内存地址。
+
+对于字符串的各种创建与比较，直接上代码，详见如下示例。
+
+**示例：常量与常量比较**
+
+```java
+String a = "ab"; // 放在常量池中
+String b = "ab"; // 从常量池中查找
+System.out.println(a == b); // true
+System.out.println(a.equals(b)); // true
+```
+
+**示例：引用与引用比较**
+
+```java
+String a = new String("ab"); // a 为一个引用
+String b = new String("ab"); // b为另一个引用,对象的内容一样
+System.out.println(a == b); // false，比较的是内存地址
+System.out.println(a.equals(b)); // true，比较的是对象的值
+```
+
+**示例：常量与引用的比较**
+
+```java
+String a = "ab"; // 放在常量池中
+String b = new String("ab");
+System.out.println(a == b); // false
+System.out.println(a.equals(b)); // true
+```
+
+**示例：+ 运算后比较**
+
+```java
+String str1 = "str";
+String str2 = "ing";
+String str3 = "str" + "ing";	// 常量池
+String str4 = str1 + str2;		// 创建了新的对象
+System.out.println(str3 == str4); //false
+
+String str5 = "string";
+System.out.println(str3 == str5); //true
+System.out.println(str4 == str5); //false
+```
+
+**示例：final 修饰后比较**
+
+```java
+final String str1 = "str";
+final String str2 = "ing";
+// 下面两个表达式其实是等价的
+String c = "str" + "ing";// 常量池中的对象
+String d = str1 + str2;  // 常量池中的对象
+System.out.println(c == d); // true
+```
+
+> 被 `final` 关键字修改之后的 `String` 会被编译器当做常量来处理，编译器在程序编译期就可以确定它的值，其效果就相当于访问常量。
+
+**示例：运行时才确定的值的比较**
+
+```java
+final String str1 = "str";    	// 编译时确定
+final String str2 = getStr();	// 运行时确定
+
+String c = "str" + "ing";	// 常量池中的对象
+String d = str1 + str2; 	// 在堆上创建的新的对象
+System.out.println(c == d);	// false
+
+public static String getStr() {
+      return "ing";
+}
+```
+
+**示例：intern() 方法后获取的引用的比较**
+
+```java
+// 在堆中创建字符串对象”Java“
+// 将字符串对象”Java“的引用保存在字符串常量池中
+String s1 = "Java";
+// 直接返回字符串常量池中字符串对象”Java“对应的引用
+String s2 = s1.intern();
+
+// s1 和 s2 指向的是堆中的同一个对象
+System.out.println(s1 == s2); // true
+
+// 在堆中在单独创建一个字符串对象
+String s3 = new String("Java");
+// 直接返回字符串常量池中字符串对象”Java“对应的引用
+String s4 = s3.intern();
+
+// s3 和 s4 指向的是堆中不同的对象
+System.out.println(s3 == s4); // false
+
+// s1 和 s4 指向的是堆中的同一个对象
+System.out.println(s1 == s4); //true
+```
+
+
+
+#### String、StringBuffer、StringBuilder 的区别
+
+可变性：
+
++ `String` 是不可变的。
++ `StringBuilder` 与 `StringBuffer` 没有使用 `final` 和 `private` 关键字修饰，提供了修改字符串的方法比如 `append` 。
+
+线程安全性：
+
++ `String` 中的对象是不可变的，也就可以理解为常量，线程安全。
++ `StringBuffer` 对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。
++ `StringBuilder` 并没有对方法进行加同步锁，所以是非线程安全的。
+
+性能：
+
++ 对 `String` 类型进行改变的时候，会生成新的 `String` 对象，然后将指针指向新的 `String` 对象。
++ `StringBuffer` 会对 `StringBuffer` 对象本身进行操作，而不生成新的对象并改变对象引用。
++ 相同情况下使用 `StringBuilder` 相比使用 `StringBuffer` 仅能获得 10%~15% 左右的性能提升，但却要冒多线程不安全的风险。
+
+**对于三者使用的总结：**
+
+1. 操作少量的数据: 适用 `String`
+2. 单线程操作字符串缓冲区下操作大量数据: 适用 `StringBuilder`
+3. 多线程操作字符串缓冲区下操作大量数据: 适用 `StringBuffer`
+
+
+
+## 5、面向对象
+
+### 5.1 面向对象与面向过程
+
+- `面向过程` 把解决问题的过程拆成一个个方法，通过一个个方法的执行解决问题。
+- `面向对象` 会先抽象出对象，然后用对象执行方法的方式解决问题。
+
+### 5.2 面向对象三大特征
+
+- 封装 : 把一个对象的状态信息（也就是属性）隐藏在对象内部，不允许外部对象直接访问对象的内部信息。但是可以提供一些可以被外界访问的方法来操作属性。
+- 继承 : 不同类型的对象，相互之间经常有一定数量的共同点。继承是使用已存在的类的定义作为基础建立新类的技术，新类的定义可以增加新的数据或新的功能，也可以用父类的功能，但不能选择性地继承父类。通过使用继承，可以快速地创建新的类，可以提高代码的重用，程序的可维护性，节省大量创建新类的时间 ，提高我们的开发效率。
+- 多态 : 表示一个对象具有多种的状态，具体表现为父类的引用指向子类的实例。
+
+### 5.3 对象
+
+通过 new 运算符，new 创建对象实例（对象实例在堆内存中），对象引用指向对象实例（对象引用存放在栈内存中）。
+
+一个对象引用可以指向 0 个或 1 个对象（一根绳子可以不系气球，也可以系一个气球）;一个对象可以有 n 个引用指向它（可以用 n 条绳子系住一个气球）。
+
+### 5.4 构造方法
+
+构造方法是一种特殊的方法，主要作用是完成对象的初始化工作。
+
+
+
+
+
+### 5.5 接口和抽象类
+
+**共同点** ：
+
+- 都不能被实例化。
+- 都可以包含抽象方法。
+- 都可以有默认实现的方法（Java 8 可以用 `default` 关键字在接口中定义默认方法）。
+
+**区别** ：
+
+- 接口主要用于对类的行为进行约束，你实现了某个接口就具有了对应的行为。抽象类主要用于代码复用，强调的是所属关系（比如说我们抽象了一个发送短信的抽象类，）。
+- 一个类只能继承一个类，但是可以实现多个接口。
+- 接口中的成员变量只能是 `public static final` 类型的，不能被修改且必须有初始值，而抽象类的成员变量默认 default，可在子类中被重新定义，也可被重新赋值。
+
+
+
+
+
+## 待整理
+
+
+
+
 
 ### 1.5 构造方法有哪些特点？是否可被 override?
 
@@ -194,13 +610,7 @@ Java 基本类型的包装类的大部分都实现了常量池技术。
 
 ### 一个类的实例从new 开始的过程
 
-## 2、面向对象
 
-### 2.1 面向对象三大特征
-
-- 封装 : 把一个对象的状态信息（也就是属性）隐藏在对象内部，不允许外部对象直接访问对象的内部信息。但是可以提供一些可以被外界访问的方法来操作属性。
-- 继承 : 不同类型的对象，相互之间经常有一定数量的共同点。继承是使用已存在的类的定义作为基础建立新类的技术，新类的定义可以增加新的数据或新的功能，也可以用父类的功能，但不能选择性地继承父类。通过使用继承，可以快速地创建新的类，可以提高代码的重用，程序的可维护性，节省大量创建新类的时间 ，提高我们的开发效率。
-- 多态 : 表示一个对象具有多种的状态，具体表现为父类的引用指向子类的实例。
 
 ### 2.2 接口和抽象类有什么共同点和区别？
 
@@ -219,15 +629,7 @@ Java 基本类型的包装类的大部分都实现了常量池技术。
 
 ### Java的多态与实现
 
-## 3、Java常用对象
 
-### 3.1 字符串拼接用“+” 还是 StringBuilder?
-
-Java 语言本身并不支持运算符重载，“+”和“+=”是专门为 String 类重载过的运算符，也是 Java 中仅有的两个重载过的元素符。不过，在循环内使用“+”进行字符串的拼接的话，存在比较明显的缺陷：**编译器不会创建单个 `StringBuilder` 以复用，会导致创建过多的 `StringBuilder` 对象**。
-
-### 3.2 String 类型的变量和常量做“+”运算时发生了什么？
-
-**对于编译期可以确定值的字符串，也就是常量字符串 ，jvm 会将其存入字符串常量池。**并且，**字符串常量拼接得到的字符串常量在编译阶段就已经被存放字符串常量池**，这个得益于编译器的优化(常量折叠)。而引用的值在程序编译期是无法确定的，编译器无法对其进行优化。不过，字符串使用 `final` 关键字声明之后，可以让编译器当做常量来处理。
 
 ### Integer 的大小
 
