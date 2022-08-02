@@ -234,33 +234,87 @@ public Person personPrototype() {
 
 ## 6、Spring AOP
 
+`AOP（Aspect-Oriented Programming，面向切面编程）`能够将那些与业务无关，却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）**封装** 起来，便于**减少系统的重复代码，降低模块间的耦合度**，并有利于未来的可拓展性和可维护性。
 
+AOP 切面编程设计到的一些专业术语：
 
+|        术语         | 含义                                                         |
+| :-----------------: | :----------------------------------------------------------- |
+|   目标（Target）    | 被通知的对象                                                 |
+|    代理（Proxy）    | 向目标对象应用通知之后创建的代理对象                         |
+| 连接点（JoinPoint） | 目标对象的所属类中，定义的所有方法均为连接点                 |
+| 切入点（Pointcut）  | 被切面拦截 / 增强的连接点（切入点一定是连接点，连接点不一定是切入点） |
+|   通知（Advice）    | 增强的逻辑 / 代码，也即拦截到目标对象的连接点之后要做的事情  |
+|   切面（Aspect）    | 切入点(Pointcut)+通知(Advice)                                |
+|   Weaving（织入）   | 将通知应用到目标对象，进而生成代理对象的过程动作             |
 
+Spring AOP 已经集成了 AspectJ ，AspectJ 基本是 Java 生态系统中最完整的 AOP 框架。
 
-
-
-AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无关，却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。
-
-### 4.2 Spring AOP 与 AspectJ AOP 的区别
+### 6.1 Spring AOP 与 AspectJ AOP 的区别
 
 **Spring AOP 属于运行时增强，而 AspectJ 是编译时增强。**
 
 Spring AOP 基于代理(Proxying)，而 AspectJ 基于字节码操作(Bytecode Manipulation)。
 
-### AspectJ切面注解通知
+AspectJ 相比于 Spring AOP 功能更加强大，但是 Spring AOP 相对来说更简单，
 
-- @Before: 前置通知, 在方法执行之前执行
-- @After: 后置通知, 在方法执行之后执行 。
-- @AfterRunning: 返回通知, 在方法返回结果之后执行
-- @AfterThrowing: 异常通知, 在方法抛出异常之后
-- @Around: 环绕通知, 围绕着方法执行
+如果我们的切面比较少，那么两者性能差异不大。但是，当切面太多的话，最好选择 AspectJ ，它比 Spring AOP 快很多。
+
+### 6.2 AspectJ 切面注解通知
+
+- `@Before`：前置通知，目标对象的方法调用之前触发
+- `@After`：后置通知，目标对象的方法调用之后触发
+- `@AfterRunning`：返回通知，目标对象的方法调用完成，在返回结果值之后触发
+- `@AfterThrowing`：异常通知，目标对象的方法运行中抛出 / 触发异常后触发。AfterReturning 和 AfterThrowing 两者互斥。如果方法调用成功无异常，则会有返回值；如果方法抛出了异常，则不会有返回值。
+- `@Around`：环绕通知，围绕着方法执行，是所有通知类型中可操作范围最大的一种。
+
+### 6.3 多个切面执行顺序
+
+方法1、通常使用 `@Order` 注解直接定义切面顺序
+
+```java
+// 值越小优先级越高
+@Order(3)
+@Component
+@Aspect
+public class LoggingAspect implements Ordered {
+}
+```
+
+方法2、实现`Ordered` 接口重写 `getOrder` 方法。
+
+```java
+@Component
+@Aspect
+public class LoggingAspect implements Ordered {
+
+    // ....
+
+    @Override
+    public int getOrder() {
+        // 返回值越小优先级越高
+        return 1;
+    }
+}
+```
 
 ## 7、Spring MVC
 
-### 7.1 工作原理
+### 7.1 Spring MVC 核心组件
 
-MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
+**MVC 是模型（Model）、视图（View）、控制器（Controller）的简写**，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
+
+**Spring MVC 的核心组件有：**
+
++ **`DispatcherServlet`** ：**核心的中央处理器**
++ **`HandlerMapping`** ：**处理器映射器**
++ **`HandlerAdapter`** ：**处理器适配器**
++ **`Handler`** ：**请求处理器**
++ **`ViewResolver`** ：**视图解析器**
+
+### 7.2 工作原理
+
+**Spring MVC 原理如下图所示：**
 
 ![](https://img.zxdmy.com/2022/202207062051678.png)
 
