@@ -2,82 +2,94 @@
 
 ## 1、Spring 框架
 
-Spring 是一款开源的轻量级 Java 开发框架，旨在提高开发人员的开发效率以及系统的可维护性。一般说 Spring 框架指的都是 Spring Framework，它是很多模块的集合，使用这些模块可以很方便地协助我们进行开发。
+`Spring` 是一款**开源的轻量级 Java 开发框架**，旨在提高开发人员的开发效率以及系统的可维护性。一般说 **Spring 框架**指的都是 `Spring Framework`，它是**很多模块的集合，**使用这些模块可以很方便地协助我们进行开发。
 
-Spring 最核心的思想就是不重新造轮子，开箱即用！
+**Spring 最核心的思想就是不重新造轮子，开箱即用！**
 
 ## 2、Spring 框架的重要模块
 
-- **Spring Core**
+`Spring` 各个模块的依赖关系如下：
 
-  **Spring 其他所有的功能基本都需要依赖于该模块，主要提供 IoC 依赖注入功能的支持。**
+![image-20220802101850532](https://img.zxdmy.com/2022/202208021018722.png)
 
-- Spring Aspects
+### 2.1 核心模块（IoC 模块）
 
-  该模块为与 AspectJ 的集成提供支持。
+**Spring 框架的核心模块（基础模块），主要提供 IoC 依赖注入功能的支持**。
 
-- **Spring AOP**
+> **Spring** 其他所有的功能基本都需要依赖于该模块。
 
-  提供了面向切面的编程实现。
+- **spring-core** ：**Spring 框架基本的核心工具类**。
+- **spring-beans** ：**提供对 bean 的创建、配置和管理等功能的支持**。
+- **spring-context** ：提供对国际化、事件传播、资源加载等功能的支持。
+- **spring-expression** ：提供对表达式语言（Spring Expression Language） SpEL 的支持，只依赖于 core 模块，不依赖于其他模块，可以单独使用
 
-- Spring Data Access
+### 2.2 AOP 模块
 
-  - **spring-jdbc : 提供了对数据库访问的抽象 JDBC。不同的数据库都有自己独立的 API 用于操作数据库，而 Java 程序只需要和 JDBC API 交互，这样就屏蔽了数据库的影响。**
-  - spring-tx : 提供对事务的支持。
-  - spring-orm : 提供对 Hibernate 等 ORM 框架的支持。
-  - spring-oxm ： 提供对 Castor 等 OXM 框架的支持。
-  - spring-jms : Java 消息服务。
+- **spring-aspects** ：**该模块为与 AspectJ 的集成提供支持。**
+- **spring-aop** ：**提供了面向切面的编程实现**。
+- **spring-instrument** ：提供了为 JVM 添加代理（agent）的功能。 具体来讲，它为 Tomcat 提供了一个织入代理，能够为 Tomcat 传递类文 件，就像这些文件是被类加载器加载的一样。没有理解也没关系，这个模块的使用场景非常有限。
 
-- **Spring Web**
+### 2.3数据库连接与整合模块
 
-  - **spring-web ：对 Web 功能的实现提供一些最基础的支持。**
-  - **spring-webmvc ： 提供对 Spring MVC 的实现。**
-  - spring-websocket ： 提供了对 WebSocket 的支持，WebSocket 可以让客户端和服务端进行双向通信。
-  - spring-webflux ：提供对 WebFlux 的支持。WebFlux 是 Spring Framework 5.0 中引入的新的响应式框架。与 Spring MVC 不同，它不需要 Servlet API，是完全异步.
+- **spring-jdbc** ：**提供了对数据库访问的抽象 JDBC。不同的数据库都有自己独立的 API 用于操作数据库，而 Java 程序只需要和 JDBC API 交互，这样就屏蔽了数据库的影响**。
+- **spring-tx** ：提供对事务的支持。
+- **spring-orm** ： 提供对 Hibernate、JPA 、iBatis 等 ORM 框架的支持。
+- **spring-oxm** ：提供一个抽象层支撑 OXM(Object-to-XML-Mapping)，例如：JAXB、Castor、XMLBeans、JiBX 和 XStream 等。
+- **spring-jms** ：Java 消息服务。自 Spring Framework 4.1 以后，它还提供了对 spring-messaging 模块的继承。
 
-- Spring Test
+### 2.4 Web 模块
 
-## 3、Spring、Spring MVC、Spring Boot 之间什么的区别
+- **spring-web** ：**对 Web 功能的实现提供一些最基础的支持**。
+- **spring-webmvc** ： **提供对 Spring MVC 的实现**。
+- **spring-websocket** ： 提供了对 WebSocket 的支持，WebSocket 可以让客户端和服务端进行双向通信。
+- **spring-webflux** ：提供对 WebFlux 的支持。WebFlux 是 Spring Framework 5.0 中引入的新的响应式框架。与 Spring MVC 不同，它不需要 Servlet API，是完全异步。
 
-Spring MVC 是 Spring 中的一个很重要的模块，主要赋予 Spring 快速构建 MVC 架构的 Web 程序的能力。MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
+### 2.5 Test 模块
 
-Spring Boot 只是简化了配置，如果你需要构建 MVC 架构的 Web 程序，你还是需要使用 Spring MVC 作为 MVC 框架，只是说 Spring Boot 帮你简化了 Spring MVC 的很多配置，真正做到开箱即用！
+Spring 的测试模块对 JUnit（单元测试框架）、TestNG（类似 JUnit）、Mockito（主要用来 Mock 对象）、PowerMock（解决 Mockito 的问题比如无法模拟 final, static， private 方法）等等常用的测试框架支持的都比较好。
 
-## 4、Spring 的重要思想：IOC 与 AOP
+## 3、Spring、Spring MVC、Spring Boot 的区别
 
-### 4.1 IOC 与 AOP 的概念
+如前文，**Spring 包含了多种功能模块**。
 
-**IoC（Inverse of Control:控制反转）** **是一种设计思想**，而不是一个具体的技术实现。IoC 的思想就是将原本在程序中手动创建对象的控制权，交由 Spring 框架来管理。不过， IoC 并非 Spring 特有，在其他语言中也有应用(直言是面向对象编程的语言都可以实现该功能)。
+> 其中最重要的是 `Spring-Core` 模块（主要提供 IoC 依赖注入功能的支持） ，**Spring 中的其他模块的功能实现基本都需要依赖于该模块**。
 
-将对象之间的相互依赖关系交给 IoC 容器来管理，并由 IoC 容器完成对象的注入。这样可以很大程度上简化应用的开发，把应用从复杂的依赖关系中解放出来。 IoC 容器就像是一个工厂一样，当我们需要创建一个对象的时候，只需要配置好配置文件/注解即可，完全不用考虑对象是如何被创建出来的。
+**Spring MVC 是 Spring 中的一个很重要的模块，主要赋予 Spring 快速构建 MVC 架构的 Web 程序的能力**。
 
-**AOP(Aspect-Oriented Programming:面向切面编程)**能够将那些与业务无关，却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。
+> MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
 
-### 4.2 Spring AOP 与 AspectJ AOP 的区别
+**Spring Boot 简化了 Spring MVC 的各种配置，做到开箱即用。**
 
-**Spring AOP 属于运行时增强，而 AspectJ 是编译时增强。** 
+## 4、Spring IoC
 
-Spring AOP 基于代理(Proxying)，而 AspectJ 基于字节码操作(Bytecode Manipulation)。
+`IoC`（全写：`Inverse of Control`），即 `控制反转` 的意思。
 
-### AspectJ切面注解通知
+**IoC 是一种设计思想，而不是一个具体的技术实现。**
 
-- @Before: 前置通知, 在方法执行之前执行
-- @After: 后置通知, 在方法执行之后执行 。
-- @AfterRunning: 返回通知, 在方法返回结果之后执行
-- @AfterThrowing: 异常通知, 在方法抛出异常之后
-- @Around: 环绕通知, 围绕着方法执行
+IoC 的思想就是**将原本在程序中手动创建对象的控制权，交由 Spring 框架来管理**。不过， IoC 并非 Spring 特有，在其他语言中也有应用。
 
-## 5、Spring Bean 相关问题
+**控制反转 包含两层含义：**
 
-### 5.1 Spring Bean 概念
+- **控制** ：指的是对象创建（实例化、管理）的权力
+- **反转** ：控制权交给外部环境（Spring 框架、IoC 容器）
 
-bean 代指的就是那些被 IoC 容器所管理的对象。
+![image-20220802104734352](https://img.zxdmy.com/2022/202208021047758.png)
 
-### Spring bean 的创建
+**如上图，将对象之间的相互依赖关系，交给 IoC 容器管理，并由 IoC 容器完成对象的注入。**
 
+> `IoC 容器` 就像工厂，当我们需要创建一个对象的时候，只需要配置好 `配置文件/注解`，无需考虑对象如何被创建，把应用从复杂的依赖关系中解放出来，极大简化开发难度。
+>
+> 比如：实际项目中的 Service 类可能依赖很多其他的类。如果需要实例化这个 Service，可能每次都需要搞清这个 Service 所有底层类的构造函数……。如果使用 IoC 的话，只需要配置好，然后在需要的地方引用即可，这极大增加了项目的可维护性，降低了开发难度。
 
+在 Spring 中， `IoC 容器`是 Spring 用来实现 IoC 的载体， `IoC 容器`实际上就是个 `Map`（key，value），Map 中存放的是各种对象。
 
-### 5.2 将一个类声明为 bean 的注解
+> Spring 时代一般通过 `XML` 文件来配置 `Bean`，后来开发人员觉得 `XML` 文件来配置不太好，于是 `SpringBoot 注解配置`就开始流行。
+
+## 5、Spring Bean
+
+简单来说，`Bean` 代指的就是那些被 `IoC 容器`所管理的 `对象`。
+
+### 5.1 将一个类声明为 bean 的注解
 
 我们一般使用 `@Autowired` 注解自动装配 bean
 
@@ -108,7 +120,44 @@ bean 代指的就是那些被 IoC 容器所管理的对象。
 1. 在 bean 中尽量避免定义可变的成员变量。
 2. 在类中定义一个 `ThreadLocal` 成员变量，将需要的可变成员变量保存在 `ThreadLocal` 中（推荐的一种方式）。
 
-## 6、Spring 事务
+
+
+## 6、Spring AOP
+
+AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无关，却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。
+
+### 4.2 Spring AOP 与 AspectJ AOP 的区别
+
+**Spring AOP 属于运行时增强，而 AspectJ 是编译时增强。**
+
+Spring AOP 基于代理(Proxying)，而 AspectJ 基于字节码操作(Bytecode Manipulation)。
+
+### AspectJ切面注解通知
+
+- @Before: 前置通知, 在方法执行之前执行
+- @After: 后置通知, 在方法执行之后执行 。
+- @AfterRunning: 返回通知, 在方法返回结果之后执行
+- @AfterThrowing: 异常通知, 在方法抛出异常之后
+- @Around: 环绕通知, 围绕着方法执行
+
+## 7、Spring MVC
+
+### 7.1 工作原理
+
+MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
+
+![](https://img.zxdmy.com/2022/202207062051678.png)
+
+1. **客户端（浏览器）发送请求，直接请求到 `DispatcherServlet`。**
+2. **`DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。**
+3. **解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由 `HandlerAdapter` 适配器处理。**
+4. **`HandlerAdapter` 会根据 `Handler`来调用真正的处理器开处理请求，并处理相应的业务逻辑。**
+5. 处理器处理完业务后，会返回一个 `ModelAndView` 对象，`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
+6. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
+7. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
+8. 把 `View` 返回给请求者（浏览器）
+
+## 8、Spring 事物
 
 ### Spring 管理事务的方式有几种？
 
@@ -155,6 +204,12 @@ bean 代指的就是那些被 IoC 容器所管理的对象。
 - repeatable_read
 - serializable
 
+
+
+
+
+## 待整理
+
 ## 7、Spring 框架中用到的设计模式
 
 - **工厂设计模式** : Spring 使用工厂模式通过 `BeanFactory`、`ApplicationContext` 创建 bean 对象。
@@ -164,25 +219,6 @@ bean 代指的就是那些被 IoC 容器所管理的对象。
 - **包装器设计模式** : 我们的项目需要连接多个数据库，而且不同的客户在每次访问中根据需要会去访问不同的数据库。这种模式让我们可以根据客户的需求能够动态切换不同的数据源。
 - **观察者模式:** Spring 事件驱动模型就是观察者模式很经典的一个应用。
 - **适配器模式** : Spring AOP 的增强或通知(Advice)使用到了适配器模式、spring MVC 中也是用到了适配器模式适配`Controller`。
-
-## 8、Spring MVC 工作原理
-
-MVC 是模型(Model)、视图(View)、控制器(Controller)的简写，其核心思想是通过将业务逻辑、数据、显示分离来组织代码。
-
-![](https://img.zxdmy.com/2022/202207062051678.png)
-
-1. **客户端（浏览器）发送请求，直接请求到 `DispatcherServlet`。**
-2. **`DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。**
-3. **解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由 `HandlerAdapter` 适配器处理。**
-4. **`HandlerAdapter` 会根据 `Handler`来调用真正的处理器开处理请求，并处理相应的业务逻辑。**
-5. 处理器处理完业务后，会返回一个 `ModelAndView` 对象，`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
-6. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
-7. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
-8. 把 `View` 返回给请求者（浏览器）
-
-
-
-
 
 ## 依赖循环？三级缓存？
 
