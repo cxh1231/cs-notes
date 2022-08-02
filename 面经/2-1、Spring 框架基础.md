@@ -1,4 +1,4 @@
-# 3-1　Spring 框架基础
+# 2-1　Spring 框架基础
 
 ## 1、Spring 框架
 
@@ -89,27 +89,137 @@ IoC 的思想就是**将原本在程序中手动创建对象的控制权，交�
 
 简单来说，`Bean` 代指的就是那些被 `IoC 容器`所管理的 `对象`。
 
-### 5.1 将一个类声明为 bean 的注解
+可以通过配置元数据定义对象，进而交给 IoC 容器管理。
 
-我们一般使用 `@Autowired` 注解自动装配 bean
+配置元数据的方式可以是 XML、注解或Java配置类。
+
+`org.springframework.beans`和 `org.springframework.context` 这两个包是 `IoC` 实现的基础。
+
+### 5.1 将类声明为 Bean 的注解
+
+一般使用 `@Component`、`@Repository` 、`@Service`、`@Controller`将类声明为 Bean，详情如下：
 
 + `@Component` ：通用的注解，可标注任意类为 `Spring` 组件。如果一个 Bean 不知道属于哪个层，可以使用`@Component` 注解标注。
-+ `@Repository` : 对应持久层即 Dao 层，主要用于数据库相关操作。
-+ `@Service` : 对应服务层，主要涉及一些复杂的逻辑，需要用到 Dao 层。
-+ `@Controller` : 对应 Spring MVC 控制层，主要功能是接受用户请求并调用 Service 层返回数据给前端页面。
++ `@Repository` : 对应**持久层**即 Dao 层，主要用于数据库相关操作。
++ `@Service` : 对应**服务层**，主要涉及一些复杂的逻辑，需要用到 Dao 层。
++ `@Controller` : 对应 Spring MVC **控制层**，主要接受用户请求并调用 Service 层返回数据给前端页面。
 
-### 5.3 bean 的作用域
+#### @Component 和 @Bean 的区别
 
-- **singleton** : 唯一 bean 实例，Spring 中的 bean 默认都是单例的，对单例设计模式的应用。
-- **prototype** : 每次请求都会创建一个新的 bean 实例。
-- **request** : 每一次 HTTP 请求都会产生一个新的 bean，该 bean 仅在当前 HTTP request 内有效。
-- **session** : 每一次来自新 session 的 HTTP 请求都会产生一个新的 bean，该 bean 仅在当前 HTTP session 内有效。
+- `@Component` 注解作用于类，而`@Bean`注解作用于方法。
+- `@Component`通常是通过类路径扫描来自动侦测以及自动装配到 Spring 容器中（我们可以使用 `@ComponentScan` 注解定义要扫描的路径从中找出标识了需要装配的类自动装配到 Spring 的 bean 容器中）。`@Bean` 注解通常是我们在标有该注解的方法中定义产生这个 bean,`@Bean`告诉了 Spring 这是某个类的实例，当我需要用它的时候还给我。
+- `@Bean` 注解比 `@Component` 注解的自定义性更强，而且很多地方我们只能通过 `@Bean` 注解来注册 bean。比如当我们引用第三方库中的类需要装配到 `Spring`容器时，则只能通过 `@Bean`来实现。
 
-### 5.4 @Component 和 @Bean 的区别
+### 5.2 注入 Bean 的注解
 
-1. `@Component` 注解作用于类，而`@Bean`注解作用于方法。
-2. `@Component`通常是通过类路径扫描来自动侦测以及自动装配到 Spring 容器中。`@Bean` 注解通常是我们在标有该注解的方法中定义产生这个 bean,`@Bean`告诉了 Spring 这是某个类的实例，当我需要用它的时候还给我。
-3. `@Bean` 注解比 `@Component` 注解的自定义性更强，而且很多地方我们只能通过 `@Bean` 注解来注册 bean。比如当我们引用第三方库中的类需要装配到 `Spring`容器时，则只能通过 `@Bean`来实现。
+Spring 内置的 `@Autowired` 以及 JDK 内置的 `@Resource` 和 `@Inject` 都可以注入（自动装配） Bean，`@Autowired` 和`@Resource`使用的比较多。
+
+|     注解     |  来源  |         优先注入方式         |
+| :----------: | :----: | :--------------------------: |
+| `@Autowired` | Spring | `byType`（根据类型进行匹配） |
+| `@Resource`  |  JDK   | `byName`（根据名称进行匹配） |
+
+详细如下。
+
+#### @Autowired
+
+**`@Autowired` 属于 Spring 内置的注解，默认的注入方式为`byType`（根据类型进行匹配），即优先根据接口类型去匹配并注入 Bean （接口的实现类）。**
+
+但是：当一个接口存在多个实现类的话，`byType`这种方式就无法正确注入对象，会变成 `byName`（根据名称进行匹配），这个名称通常就是类名（首字母小写）。
+
+比如： `SmsService` 接口有两个实现类: `SmsServiceImpl1`和 `SmsServiceImpl2`，且它们都已经被 Spring 容器所管理，那么下面的第一种方式就无法注入 Bean。
+
+```java
+// 报错，byName 和 byType 都无法匹配到 bean
+@Autowired
+private SmsService smsService;
+
+// 正确注入 SmsServiceImpl1 对象对应的 bean，通过名称匹配
+@Autowired
+private SmsService smsServiceImpl1;
+
+// 正确注入  SmsServiceImpl1 对象对应的 bean
+// smsServiceImpl1 就是我们上面所说的名称
+@Autowired
+@Qualifier(value = "smsServiceImpl1")
+private SmsService smsService;
+```
+
+> 对于一个接口多个实现类的情况，建议通过 `@Qualifier` 注解来显示指定名称。
+
+#### @Resource
+
+`@Resource` 属于 JDK 提供的注解，默认注入方式为 `byName`。如果无法通过名称匹配到对应的 Bean 的话，注入方式会变为 `byType`。
+
+`@Resource` 注解有两个比较重要且日常开发常用的属性：`name`（名称）、`type`（类型）。
+
++ 如果不指定`name` 和 `type` ，则先 `byName` ，再 `byType` ；
++ 如果仅指定 `name` ，则注入方式为`byName`；
++ 如果仅指定 `type` ，则注入方式为`byType`；
++ 如果同时指定 `name`  和 `type` 属性，则注入方式为`byType`+`byName`（TM吃饱了撑的写这么多）
+
+比如： `SmsService` 接口有两个实现类: `SmsServiceImpl1`和 `SmsServiceImpl2`：
+
+```java
+// 报错，byName 和 byType 都无法匹配到 bean
+@Resource
+private SmsService smsService;
+
+// 正确注入 SmsServiceImpl1 对象对应的 bean
+@Resource
+private SmsService smsServiceImpl1;
+
+// 正确注入 SmsServiceImpl1 对象对应的 bean（比较推荐这种方式）
+@Resource(name = "smsServiceImpl1")
+private SmsService smsService;
+```
+
+### 5.3 Bean 的作用域
+
+Spring 中 Bean 的作用域通常有下面几种：
+
+- **singleton** : IoC 容器中只有唯一的 bean 实例。Spring 中的 bean 默认都是单例的，是对单例设计模式的应用。
+- **prototype** : 每次获取都会创建一个新的 bean 实例。也就是说，连续 `getBean()` 两次，得到的是不同的 Bean 实例。
+- **request** （仅 Web 应用可用）: 每一次 HTTP 请求都会产生一个新的 bean（请求 bean），该 bean 仅在当前 HTTP request 内有效。
+- **session** （仅 Web 应用可用） : 每一次来自新 session 的 HTTP 请求都会产生一个新的 bean（会话 bean），该 bean 仅在当前 HTTP session 内有效。
+- **application/global-session** （仅 Web 应用可用）： 每个 Web 应用在启动时创建一个 Bean（应用 Bean），，该 bean 仅在当前应用启动时间内有效。
+- **websocket** （仅 Web 应用可用）：每一次 WebSocket 会话产生一个新的 bean。
+
+**可以通过 `XML` 或 `注解方式` 配置 Bean 的作用域：**
+
+XML：
+
+```xml
+<bean id="..." class="..." scope="singleton"></bean>
+```
+
+注解：
+
+```java
+@Bean
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public Person personPrototype() {
+    return new Person();
+}
+```
+
+### 5.4 Bean 的生命周期
+
+![image-20220802151417390](https://img.zxdmy.com/2022/202208021514870.png)
+
+- Bean 容器找到配置文件中 Spring Bean 的定义。
+- Bean 容器利用 Java Reflection API 创建一个 Bean 的实例。
+- 如果涉及到一些属性值 利用 `set()`方法设置一些属性值。
+- 如果 Bean 实现了 `BeanNameAware` 接口，调用 `setBeanName()`方法，传入 Bean 的名字。
+- 如果 Bean 实现了 `BeanClassLoaderAware` 接口，调用 `setBeanClassLoader()`方法，传入 `ClassLoader`对象的实例。
+- 如果 Bean 实现了 `BeanFactoryAware` 接口，调用 `setBeanFactory()`方法，传入 `BeanFactory`对象的实例。
+- 与上面的类似，如果实现了其他 `*.Aware`接口，就调用相应的方法。
+- 如果有和加载这个 Bean 的 Spring 容器相关的 `BeanPostProcessor` 对象，执行`postProcessBeforeInitialization()` 方法
+- 如果 Bean 实现了`InitializingBean`接口，执行`afterPropertiesSet()`方法。
+- 如果 Bean 在配置文件中的定义包含 init-method 属性，执行指定的方法。
+- 如果有和加载这个 Bean 的 Spring 容器相关的 `BeanPostProcessor` 对象，执行`postProcessAfterInitialization()` 方法
+- 当要销毁 Bean 的时候，如果 Bean 实现了 `DisposableBean` 接口，执行 `destroy()` 方法。
+- 当要销毁 Bean 的时候，如果 Bean 在配置文件中的定义包含 destroy-method 属性，执行指定的方法。
 
 ### 5.5 单例 Bean 的线程安全问题
 
@@ -120,9 +230,15 @@ IoC 的思想就是**将原本在程序中手动创建对象的控制权，交�
 1. 在 bean 中尽量避免定义可变的成员变量。
 2. 在类中定义一个 `ThreadLocal` 成员变量，将需要的可变成员变量保存在 `ThreadLocal` 中（推荐的一种方式）。
 
-
+不过，大部分 Bean 实际都是无状态（没有实例变量）的（比如 Dao、Service），这种情况下， Bean 是线程安全的。
 
 ## 6、Spring AOP
+
+
+
+
+
+
 
 AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无关，却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来，便于减少系统的重复代码，降低模块间的耦合度，并有利于未来的可拓展性和可维护性。
 
