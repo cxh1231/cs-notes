@@ -321,15 +321,134 @@ volatile 关键字，在单例模式里有什么作用
 
 ## 7、线程池
 
-### 使用线程池的原因
+### 7.1 使用线程池的原因
 
-如果我们在方法中直接new一个线程来处理，当这个方法被调用频繁时就会创建很多线程，不仅会消耗系统资源，还会降低系统的稳定性，一不小心把系统搞崩了，就可以直接去财务那结帐了。
+> **池化技术** 的思想，在项目中已被广泛应用，比如数据库连接处、HTTP 连接池等等，池化技术的思想主要是为了减少每次获取资源的消耗，提供对资源的利用率。
 
-如果我们合理的使用线程池，则可以避免把系统搞崩的窘境。总得来说，使用线程池可以带来以下几个好处：
+**线程池** 提供了一种限制和管理资源（包括执行一个任务）的方式。
 
-降低资源消耗。通过重复利用已创建的线程，降低线程创建和销毁造成的消耗。
-提高响应速度。当任务到达时，任务可以不需要等到线程创建就能立即执行。
-增加线程的可管理型。线程是稀缺资源，使用线程池可以进行统一分配，调优和监控。
+每个**线程池** 维护了一些基本统计信息，例如已完成任务的数量
+
+**使用线程池的好处**：
+
+- **降低资源消耗**。通过`重复利用已创建的线程`降低线程创建和销毁造成的消耗。
+- **提高响应速度**。当任务到达时，任务可以`不需要等到线程创建就能立即执行`。
+- **提高线程的可管理性**。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，`使用线程池可以进行统一的分配，调优和监控` 。
+
+### 7.2 Executor 框架结构
+
+`Executor` 框架是 Java5 之后引进的，通过 `Executor` 来启动线程比使用 `Thread` 的 `start` 方法更好，除了更易管理，效率更好（用线程池实现，节约开销）外，还有关键的一点：有助于避免 this 逃逸问题。
+
+> 补充：this 逃逸是指在构造函数返回之前其他线程就持有该对象的引用. 调用尚未构造完全的对象的方法可能引发令人疑惑的错误。
+
+`Executor` 框架不仅包括了**线程池的管理**，还提供了**线程工厂**、**队列**以及**拒绝策略**等，`Executor` 框架让并发编程变得更加简单。
+
+#### 结构1：任务（Runnable /Callable）
+
+执行任务需要实现 **`Runnable` 接口** 或 **`Callable`接口**。**`Runnable` 接口 **或 **`Callable` 接口** 的实现类都可以被 **`ThreadPoolExecutor`** 或 **`ScheduledThreadPoolExecutor`** 执行。
+
+> **`Runnable` 接口和 `Callable` 接口的区别：**
+>
+> + **`Runnable` 接口** 不会返回结果或抛出检查异常，但是 **`Callable` 接口** 可以。
+> + 工具类 `Executors` 可以实现将 `Runnable` 对象转换成 `Callable` 对象。
+
+#### 结构2：任务的执行（Executor）
+
+任务执行机制的**核心接口**是 **`Executor`** ，以及继承自 `Executor` 接口的 `ExecutorService` 接口。
+
+![image-20220804180215789](https://img.zxdmy.com/2022/202208041802505.png)
+
+**`ThreadPoolExecutor`** 和 **`ScheduledThreadPoolExecutor`** 这两个**关键类**实现了 `ExecutorService` 接口。
+
+> 上图的各个底层类关系中， `ThreadPoolExecutor` 类在实际使用线程池的过程中，使用频率非常高。
+
+#### 结构3：异步计算的结果（Future）
+
+**`Future`** 接口以及 `Future` 接口的实现类 **`FutureTask`** 类都可以代表异步计算的结果。
+
+当我们把 **`Runnable`接口** 或 **`Callable` 接口** 的实现类提交给 **`ThreadPoolExecutor`** 或 **`ScheduledThreadPoolExecutor`** 执行，调用 `submit()` 方法时会返回一个 **`FutureTask`** 对象。
+
+> **`ExecutorService` 接口有两种执行线程任务的方法：`execute()` 和 `submit()`，其区别如下**：
+>
+> + `execute()`方法用于提交不需要返回值的任务，所以无法判断任务是否被线程池执行成功与否；
+> + `submit()`方法用于提交需要返回值的任务。线程池会返回一个 `Future` 类型的对象，通过这个 `Future` 对象可以判断任务是否执行成功，并且可以通过 `Future` 的 `get()`方法来获取返回值，`get()`方法会阻塞当前线程直到任务完成，而使用 `get(long timeout，TimeUnit unit)`方法则会阻塞当前线程一段时间后立即返回，这时候有可能任务没有执行完。
+
+#### Executor 的执行流程
+
+如下图所示：
+
+![image-20220804181040377](https://img.zxdmy.com/2022/202208041810573.png)
+
+1. **主线程**创建实现 `Runnable` 或 `Callable` 接口的**任务对象**；
+2. 可以把实现 `Runnable`接口的 **任务对象** 直接交给 `ExecutorService` 的`execute(Runnable command)` 方法执行；
+3. 或者可以把实现 `Runnable/Callable` 接口的 **任务对象** 提交给 `ExecutorService` 的`submit(Runnable task)` 或  `submit(Callable <T> task)` 执行，并返回一个实现`Future`接口的`FutureTask` 对象。
+4. 最后，主线程可以执行 `FutureTask.get()`方法来等待任务执行完成。
+5. 主线程也可以执行 `FutureTask.cancel（boolean mayInterruptIfRunning）`来取消此任务的执行。
+
+### 7.3 ThreadPoolExecutor 类
+
+> 线程池实现类 `ThreadPoolExecutor` 是 `Executor` 框架最核心的类。
+
+#### ThreadPoolExecutor 类分析
+
+`ThreadPoolExecutor` 类中提供的四个构造方法。其中最基础的构造方法如下：
+
+```java
+/**
+ * 用给定的初始参数创建一个新的ThreadPoolExecutor。
+ */
+public ThreadPoolExecutor(int corePoolSize,//线程池的核心线程数量
+                          int maximumPoolSize,//线程池的最大线程数
+                          long keepAliveTime,//当线程数大于核心线程数时，多余的空闲线程存活的最长时间
+                          TimeUnit unit,//时间单位
+                          BlockingQueue<Runnable> workQueue,//任务队列，
+                          ThreadFactory threadFactory,//线程工厂，用来创建线程，一般默认即可
+                          RejectedExecutionHandler handler//拒绝策略，
+                           ) {
+    if (corePoolSize < 0 ||
+        maximumPoolSize <= 0 ||
+        maximumPoolSize < corePoolSize ||
+        keepAliveTime < 0)
+        throw new IllegalArgumentException();
+    if (workQueue == null || threadFactory == null || handler == null)
+        throw new NullPointerException();
+    this.corePoolSize = corePoolSize;
+    this.maximumPoolSize = maximumPoolSize;
+    this.workQueue = workQueue;
+    this.keepAliveTime = unit.toNanos(keepAliveTime);
+    this.threadFactory = threadFactory;
+    this.handler = handler;
+}
+```
+
+其他构造方法均基于此，对一些默认参数进行指定。
+
+**构造方法的 7 个参数：**
+
+1. **`corePoolSize`** ：核心线程数，定义最小可以同时运行的线程数量。
+2. **`maximumPoolSize`** ：线程池的最大线程数。当队列中存放的任务达到队列容量的时候，当前可以同时运行的线程数量变为最大线程数。
+3. **`workQueue`**：任务队列，用来储存等待执行任务的队列。新任务来的时候会先判断当前运行的线程数量是否达到核心线程数，如果达到的话，新任务就会被存放在队列中。
+4. **`keepAliveTime`** ：当线程池中的线程数量大于 `corePoolSize` 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 `keepAliveTime`才会被回收销毁；
+5. **`unit`** ：`keepAliveTime` 参数的时间单位。
+6. **`threadFactory`** ：线程工厂，`executor` 创建新线程的时候会用到，一般默认即可。。
+7. **`handler`** :饱和策略（拒绝策略），当提交的任务过多而不能及时处理时，定制策略来处理任务：
+  + `ThreadPoolExecutor.AbortPolicy` ：（默认策略）抛出 `RejectedExecutionException`来拒绝新任务的处理。
+  + `ThreadPoolExecutor.CallerRunsPolicy` ：（推荐使用）调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
+  + `ThreadPoolExecutor.DiscardPolicy` ：不处理新任务，直接丢弃掉。
+  + `ThreadPoolExecutor.DiscardOldestPolicy` ：此策略将丢弃最早的未处理的任务请求。
+
+> 不允许使用 `Executors` 去创建，而是通过 `ThreadPoolExecutor` 构造函数的方式创建线程池的原因：规避资源耗尽的风险。
+>
+> `Executors` 返回线程池对象的弊端如下：
+>
+> - `FixedThreadPool` 和 `SingleThreadExecutor` ：允许**请求的队列长度**为 `Integer.MAX_VALUE` ，可能堆积大量的请求，从而导致 OOM。
+> - `CachedThreadPool` 和 `ScheduledThreadPool` ：允许**创建的线程数量**为 `Integer.MAX_VALUE` ，可能会创建大量线程，从而导致 OOM。
+
+
+
+
+
+
 
 ### 线程池的核心属性
 
