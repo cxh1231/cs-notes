@@ -21,13 +21,15 @@ Spring Boot  旨在简化 Spring 开发（减少配置文件，开箱即用！�
 7. Spring Boot 提供命令行接口(CLI)工具，用于开发和测试 Spring Boot 应用程序，如 Java 或 Groovy。
 8. Spring Boot 提供了多种插件，可以使用内置工具(如 Maven 和 Gradle)开发和测试 Spring Boot 应用程序
 
+##  2、Spring Boot Starters
 
+`Spring Boot Starters` 是一系列 **依赖关系的集合**，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。
 
-##  Spring Boot Starters
+比如进行 Web 项目开发，只需添加一个 `spring-boot-starter-web` 依赖，则该依赖的子依赖中包含了我们开发 REST 服务需要的所有依赖。
 
-Spring Boot Starters 是一系列依赖关系的集合，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。
+## 3、@SpringBootApplication 与自动装配
 
-## @SpringBootApplication 注解
+### 3.1 @SpringBootApplication 注解
 
 在 IDEA 中 `XXXApplication.java` 启动类中，进入 `@SpringBootApplication` 注解，可以看到其详细实现：
 
@@ -39,7 +41,7 @@ Spring Boot Starters 是一系列依赖关系的集合，因为它的存在，�
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {
     ……
 }
@@ -55,7 +57,7 @@ public @interface SpringBootApplication {
 @Indexed
 public @interface SpringBootConfiguration {
     @AliasFor(
-        annotation = Configuration.class
+            annotation = Configuration.class
     )
     boolean proxyBeanMethods() default true;
 }
@@ -65,9 +67,63 @@ public @interface SpringBootConfiguration {
 
 **根据 SpringBoot 官网，这三个注解的作用：**
 
-+ `@EnableAutoConfiguration`：启用 SpringBoot 的自动配置机制；
++ `@EnableAutoConfiguration`：启用 SpringBoot 的**自动配置**机制；
 + `@ComponentScan`：扫描被 `@Component`（`@Service`，`@Controller`）注解的 `bean`，注解默认会扫描该类所在的包下所有的类；
 + `@Configuration`：允许在上下文中注册额外的 `bean` 或导入其他配置类。
 
+### 3.2 Spring Boot 自动配置
+
+已知 `@SpringBootApplication` 看作是 `@Configuration`、`@EnableAutoConfiguration`、`@ComponentScan` 注解的集合。
+
 **`@EnableAutoConfiguration` 是启动自动配置的关键**。
 
+通过 IDEA 进入 `@EnableAutoConfiguration` 注解的接口类中，可以看到如下代码：
+
+![image-20220808160057353](https://img.zxdmy.com/2022/202208081718252.png)
+
+即 `@EnableAutoConfiguration` 注解通过 Spring 提供的 `@Import` 注解导入了`AutoConfigurationImportSelector.class` 类
+
+> `@Import` 注解可以导入配置类或者 Bean 到当前类中。
+
+接着进入`AutoConfigurationImportSelector.class` 类中的 `getCandidateConfigurations()`方法，如下图所示
+
+![image-20220808160305371](https://img.zxdmy.com/2022/202208081718979.png)
+
+该方法会将所有**自动配置类的信息以 List 的形式返回**。这些配置信息会被 `Spring` 容器作 `bean` 来管理。
+
+有了**自动配置信息**，接着通过**条件装配注解** `@Conditional` ，用于限制 `@Bean` 注解在什么时候才生效。
+
+## 4、 RESTful Web 服务常用注解
+
+#### Bean 相关
+
++ `@Autowired` ：自动导入对象到类中，被注入进的类同样要被 Spring 容器管理。
+
++ `@Component` ：通用的注解，可标注任意类为 Spring 组件。如果一个 Bean 不知道属于哪个层，可以使用@Component 注解标注。
+
++ `@Repository`、`@Mapping` ：对应**持久层**，即 Dao 层，主要用于数据库相关操作。
+
+  > `@Repository` 标注的接口，需要在启动类使用 `@MapperScan` 扫描该接口。
+
++ `@Service` ：对应**服务层**，主要涉及一些复杂的逻辑，需要用到 Dao 层。
+
++ `@Controller` ：对应 Spring MVC **控制层**，主要用于接受用户请求并调用 Service 层返回数据给前端页面。
+
++ `@RestController` ： `@RestController` 注解是 `@Controller` 和 `@ResponseBody` 的合集，表示这是个控制器 `bean`，并且是将函数的返回值，直接填入 HTTP 响应体中，是 `REST` 风格的控制器。
+
+#### HTTP 请求相关
+
++ `@GetMapping` : GET 请求
++ `@PostMapping` : POST 请求
++ `@PutMapping` : PUT 请求
++ `@DeleteMapping` : DELETE 请求。
+
+> 注：`@PostMapping` 多次相同POST会产生多份相同的数据，不具有幂等性；`@PutMapping` 多次相同的PUT请求和第一次相同，具有幂等性。
+
+#### 前后端传值
+
++ `@RequestParam` ：获取查询参数
++ `@Pathvairable` ：获取路径参数
++ `@RequestBody` ：用于读取 Request 请求（可能是 POST,PUT,DELETE,GET 请求）的 body 部分并且 Content-Type 为 application/json 格式的数据，接收到数据之后会自动将数据绑定到 Java 对象上去。系统会使用HttpMessageConverter或者自定义的HttpMessageConverter将请求的 body 中的 json 字符串转换为 java 对象。
+
+![img](https://img.zxdmy.com/2022/202208081718707.jpg)
