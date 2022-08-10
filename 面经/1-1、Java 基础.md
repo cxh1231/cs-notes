@@ -191,34 +191,34 @@ User.java：
 ```java
 public class User {
 
-    public String name;
+   public String name;
 
-    // 构造代码块
-    {
-        name = "张三";
-        System.out.println("User：构造代码块");
-    }
+   // 构造代码块
+   {
+      name = "张三";
+      System.out.println("User：构造代码块");
+   }
 
-    // 无参构造代码块
-    public User() {
-        System.out.println("User：无参构造代码块");
-    }
+   // 无参构造代码块
+   public User() {
+      System.out.println("User：无参构造代码块");
+   }
 
-    // 有参构造代码块
-    public User(String name) {
-        this.name = name;
-        System.out.println("User：有参构造代码块");
-    }
+   // 有参构造代码块
+   public User(String name) {
+      this.name = name;
+      System.out.println("User：有参构造代码块");
+   }
 
-    // 静态代码块
-    static {
-        System.out.println("User：静态代码块");
-    }
+   // 静态代码块
+   static {
+      System.out.println("User：静态代码块");
+   }
 
-    // 普通代码块
-    public String getName() {
-        return name;
-    }
+   // 普通代码块
+   public String getName() {
+      return name;
+   }
 }
 ```
 
@@ -226,26 +226,26 @@ public class User {
 
 ```java
 public class Main {
-    public static void main(String[] args) {
-        User user = new User("用户李四");
-        System.out.println(user.getName());
+   public static void main(String[] args) {
+      User user = new User("用户李四");
+      System.out.println(user.getName());
 
-        System.out.println("----------");
+      System.out.println("----------");
 
-        User user2 = new User();
-        System.out.println(user2.getName());
-    }
+      User user2 = new User();
+      System.out.println(user2.getName());
+   }
 }
 /**
-User：静态代码块
-User：构造代码块
-User：有参构造代码块
-用户李四
-----------
-User：构造代码块
-User：无参构造代码块
-张三
-*/
+ User：静态代码块
+ User：构造代码块
+ User：有参构造代码块
+ 用户李四
+ ----------
+ User：构造代码块
+ User：无参构造代码块
+ 张三
+ */
 ```
 
 继承中代码块执行顺序：**父类静态块 —> 子类静态块 —> 父类代码块 —> 父类构造器 —> 子类代码块 —> 子类构造器**，示例如下：
@@ -255,27 +255,27 @@ User：无参构造代码块
 ```java
 public class Student extends User {
 
-    // 构造代码块
-    {
-        name = "李四";
-        System.out.println("Student：构造代码块");
-    }
+   // 构造代码块
+   {
+      name = "李四";
+      System.out.println("Student：构造代码块");
+   }
 
-    // 无参构造代码块
-    public Student() {
-        System.out.println("Student：无参构造代码块");
-    }
+   // 无参构造代码块
+   public Student() {
+      System.out.println("Student：无参构造代码块");
+   }
 
-    // 有参构造代码块
-    public Student(String name) {
-        System.out.println("Student：有参构造代码块");
-    }
+   // 有参构造代码块
+   public Student(String name) {
+      System.out.println("Student：有参构造代码块");
+   }
 
 
-    // 静态代码块
-    static {
-        System.out.println("Student：静态代码块");
-    }
+   // 静态代码块
+   static {
+      System.out.println("Student：静态代码块");
+   }
 }
 ```
 
@@ -283,31 +283,31 @@ public class Student extends User {
 
 ```java
 public class Main {
-    public static void main(String[] args) {
-        Student student = new Student("学生王五");
-        System.out.println(student.getName());
+   public static void main(String[] args) {
+      Student student = new Student("学生王五");
+      System.out.println(student.getName());
 
-        System.out.println("----------");
+      System.out.println("----------");
 
-        Student student2 = new Student();
-        System.out.println(student2.getName());
-    }
+      Student student2 = new Student();
+      System.out.println(student2.getName());
+   }
 }
 /**
-User：静态代码块
-Student：静态代码块
-User：构造代码块
-User：无参构造代码块
-Student：构造代码块
-Student：有参构造代码块
-学生王五
-----------
-User：构造代码块
-User：无参构造代码块
-Student：构造代码块
-Student：无参构造代码块
-李四
-*/
+ User：静态代码块
+ Student：静态代码块
+ User：构造代码块
+ User：无参构造代码块
+ Student：构造代码块
+ Student：有参构造代码块
+ 学生王五
+ ----------
+ User：构造代码块
+ User：无参构造代码块
+ Student：构造代码块
+ Student：无参构造代码块
+ 李四
+ */
 ```
 
 ## 3、数据类型
@@ -361,27 +361,27 @@ Java 基本类型的包装类的大部分都实现了常量池技术。
 
 ```java
 Integer a = 33;
-Integer b1 = 33;
-Integer b2 = new Integer(33);
-System.out.println(a == b1); // true
-System.out.println(a == b2); // false
-Integer c = 1024;
-Integer d = 1024;
-System.out.println(c == d); // false
-System.out.println(c.equals(d)); // true
+        Integer b1 = 33;
+        Integer b2 = new Integer(33);
+        System.out.println(a == b1); // true
+        System.out.println(a == b2); // false
+        Integer c = 1024;
+        Integer d = 1024;
+        System.out.println(c == d); // false
+        System.out.println(c.equals(d)); // true
 
-Float i1 = 333f;
-Float i2 = 333f;
-System.out.println(i1 == i2); // false
+        Float i1 = 333f;
+        Float i2 = 333f;
+        System.out.println(i1 == i2); // false
 
-Double i3 = 1.2;
-Double i4 = 1.2;
-System.out.println(i3 == i4); // false
+        Double i3 = 1.2;
+        Double i4 = 1.2;
+        System.out.println(i3 == i4); // false
 ```
 
 下图是阿里巴巴Java开发手册给出的说明。
 
-![image-20220728142703256](1-1、Java 基础.assets/image-20220728142703256.png)
+![image-20220728142703256](https://img.zxdmy.com/2022/202208101056842.png)
 
 ### 3.4 自动装箱与拆箱
 
@@ -390,7 +390,7 @@ System.out.println(i3 == i4); // false
 
 ```java
 Integer i = 10; //装箱
-int n = i;   	//拆箱
+        int n = i;   	//拆箱
 ```
 
 即：
@@ -448,7 +448,7 @@ Object 类是一个特殊的类，是所有类的父类。它主要提供了以�
 ```java
 // native 方法，用于返回当前运行时对象的 Class 对象，使用了 final 关键字修饰，故不允许子类重写。
 public final native Class<?> getClass();
-    
+
 // native 方法，用于返回对象的哈希码，主要使用在哈希表中，比如 JDK 中的HashMap。
 public native int hashCode();
 
@@ -1375,8 +1375,8 @@ Java 的序列化机制是通过 **在运行时判断类的`serialVersionUID`来
 **显示指定 serialVersionUID 值的原因**：
 
 1. 若不指定，则 `JVM` 在序列化时会根据属性自动生成一个`serialVersionUID`。当反序列化时，JVM 会再根据属性自动生成一个**新版** `serialVersionUID`。这个`新版serialVersionUID`与序列化时生成的`旧版serialVersionUID`进行比较。
-  1. 如果序列化的这个类不做任何修改，那新旧`serialVersionUID`一致，没有问题；
-  2. 但是，如果这个类进行了迭代更新，新旧`serialVersionUID`将不致，旧对象反序列化就会报错。
+   1. 如果序列化的这个类不做任何修改，那新旧`serialVersionUID`一致，没有问题；
+   2. 但是，如果这个类进行了迭代更新，新旧`serialVersionUID`将不致，旧对象反序列化就会报错。
 2. 如果显示指定，JVM在序列化和反序列化时仍然都会生成一个serialVersionUID，但**值为我们显示指定的值**，这样在反序列化时新旧版本的serialVersionUID就一致了。
 
 ![image-20220809202546014](https://img.zxdmy.com/2022/202208092025532.png)
@@ -1413,20 +1413,15 @@ Java 的序列化机制是通过 **在运行时判断类的`serialVersionUID`来
 
 #### BIO
 
-同步并阻塞，在服务器中实现的模式为**一个连接一个线程**。也就是说，客户端有连接请求的时候，服务器就需要启动一个线程进行处理，如果这个连接不做任何事情会造成不必要的线程开销，当然这也可以通过线程池机制改善。BIO**一般适用于连接数目小且固定的架构**，这种方式对于服务器资源要求比较高，而且并发局限于应用中，是JDK1.4之前的唯一选择，但好在程序直观简单，易理解。
+**同步阻塞IO**：**同步并阻塞**，在服务器中实现的模式为**一个连接一个线程**。也就是说，客户端有连接请求的时候，服务器就需要启动一个线程进行处理，如果这个连接不做任何事情会造成不必要的线程开销，当然这也可以通过线程池机制改善。BIO**一般适用于连接数目小且固定的架构**，这种方式对于服务器资源要求比较高，而且并发局限于应用中，是JDK1.4之前的唯一选择，但好在程序直观简单，易理解。
 
 #### NIO
 
-同步并非阻塞，在服务器中实现的模式为**一个请求一个线程**，也就是说，客户端发送的连接请求都会注册到多路复用器上，多路复用器轮询到有连接IO请求时才会启动一个线程进行处理。**NIO一般适用于连接数目多且连接比较短（轻操作）的架构**，并发局限于应用中，编程比较复杂，从JDK1.4开始支持。
+**多路复用IO**：**同步并非阻塞**，在服务器中实现的模式为**一个请求一个线程**，也就是说，客户端发送的连接请求都会注册到多路复用器上，多路复用器轮询到有连接IO请求时才会启动一个线程进行处理。**NIO一般适用于连接数目多且连接比较短（轻操作）的架构**，并发局限于应用中，编程比较复杂，从JDK1.4开始支持。
 
 #### AIO
 
-异步并非阻塞，在服务器中实现的模式为**一个有效请求一个线程**，也就是说，客户端的IO请求都是通过操作系统先完成之后，再通知服务器应用去启动线程进行处理。AIO一般适用于连接数目多且连接比较长（重操作）的架构，充分调用操作系统参与并发操作，编程比较复杂，从JDK1.7开始支持。
-
-- BIO : 同步阻塞IO
-
-- NIO : 多路复用IO
-- AIO : 异步IO
+**异步IO**：异步并非阻塞，在服务器中实现的模式为**一个有效请求一个线程**，也就是说，客户端的IO请求都是通过操作系统先完成之后，再通知服务器应用去启动线程进行处理。AIO一般适用于连接数目多且连接比较长（重操作）的架构，充分调用操作系统参与并发操作，编程比较复杂，从JDK1.7开始支持。
 
 ## 10、异常
 
@@ -1476,7 +1471,7 @@ Java 的序列化机制是通过 **在运行时判断类的`serialVersionUID`来
 - `try` 块：用于捕获异常。其后可接多个 `catch` 块，若没有 `catch` 块，则必须接一个 `finally` 块。
 - `catch` 块：用于处理 `try` 捕获到的异常。
 - `finally` 块：无论是否捕获或处理异常，`finally` 块里的语句都会被执行。
-  - 当在 `try` 块或 `catch` 块中遇到 `return` 语句时，`finally` 语句块将在方法返回之前被执行。
+   - 当在 `try` 块或 `catch` 块中遇到 `return` 语句时，`finally` 语句块将在方法返回之前被执行。
 
 #### 不要在 finally 语句块中使用 return
 
