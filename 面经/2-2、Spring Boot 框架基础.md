@@ -21,15 +21,9 @@ Spring Boot  旨在简化 Spring 开发（减少配置文件，开箱即用！�
 7. Spring Boot 提供命令行接口(CLI)工具，用于开发和测试 Spring Boot 应用程序，如 Java 或 Groovy。
 8. Spring Boot 提供了多种插件，可以使用内置工具(如 Maven 和 Gradle)开发和测试 Spring Boot 应用程序
 
-##  2、Spring Boot Starters
+## 2、@SpringBootApplication与自动装配
 
-`Spring Boot Starters` 是一系列 **依赖关系的集合**，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。
-
-比如进行 Web 项目开发，只需添加一个 `spring-boot-starter-web` 依赖，则该依赖的子依赖中包含了我们开发 REST 服务需要的所有依赖。
-
-## 3、@SpringBootApplication 与自动装配
-
-### 3.1 @SpringBootApplication 注解
+### 3.1 核心注解：@SpringBootApplication
 
 在 IDEA 中 `XXXApplication.java` 启动类中，进入 `@SpringBootApplication` 注解，可以看到其详细实现：
 
@@ -41,7 +35,7 @@ Spring Boot  旨在简化 Spring 开发（减少配置文件，开箱即用！�
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {
     ……
 }
@@ -57,7 +51,7 @@ public @interface SpringBootApplication {
 @Indexed
 public @interface SpringBootConfiguration {
     @AliasFor(
-            annotation = Configuration.class
+        annotation = Configuration.class
     )
     boolean proxyBeanMethods() default true;
 }
@@ -92,6 +86,20 @@ public @interface SpringBootConfiguration {
 该方法会将所有**自动配置类的信息以 List 的形式返回**。这些配置信息会被 `Spring` 容器作 `bean` 来管理。
 
 有了**自动配置信息**，接着通过**条件装配注解** `@Conditional` ，用于限制 `@Bean` 注解在什么时候才生效。
+
+##  3、Spring Boot Starters 的工作原理
+
+`Spring Boot Starters` 是一系列 **依赖关系的集合**，因为它的存在，项目的依赖之间的关系对我们来说变的更加简单了。
+
+比如进行 Web 项目开发，只需添加一个 `spring-boot-starter-web` 依赖，则该依赖的子依赖中包含了我们开发 REST 服务需要的所有依赖。
+
+**Spring Boot 在启动的时候会干这几件事情**：
+
+- Spring Boot 在启动时会去依赖的 `Starter` 包中寻找 `resources/META-INF/spring.factories` 文件，然后根据文件中配置的 `Jar` 包去扫描项目所依赖的 `Jar` 包。
+- 根据 `spring.factories` 配置加载 `AutoConfigure` 类
+- 根据 `@Conditional` 注解的条件，进行自动配置并将 `Bean` 注入 `Spring Context`
+
+总结一下，其实就是 Spring Boot 在启动的时候，**按照约定去读取 Spring Boot Starter 的配置信息，再根据配置信息对资源进行初始化，并注入到 Spring 容器中**。这样 Spring Boot 启动完毕后，就已经准备好了一切资源，使用过程中直接注入对应 Bean 资源即可。
 
 ## 4、 RESTful Web 服务常用注解
 
