@@ -1,3 +1,5 @@
+# 1-3　Java并发
+
 ## 1、线程与进程的基本概念
 
 ### 1.1 进程与线程
@@ -355,9 +357,11 @@ A 线程执行结束
 
 > **安全状态** 指的是系统能够按照某种线程推进顺序（P1、P2、P3.....Pn）来为每个线程分配所需资源，直到满足每个线程对资源的最大需求，使每个线程都可顺利完成。称<P1、P2、P3.....Pn>序列为安全序列。
 
+## 5、锁类型简介
 
 
-## 5、synchronized 关键字
+
+## 5、加锁：synchronized 关键字
 
 ### 5.1 synchronized 简介
 
@@ -537,7 +541,48 @@ public class SynchronizedDemo2 {
 
 > synchronized 的锁优化
 
-## 6、volatile 关键字
+## 6、加锁：Lock 接口
+
+### 简介
+
+`java.util.concurrent.locks.Lock` 是一个类似于`synchronized` 关键字的线程同步机制。
+
+`Lock` 比 `synchronized` 块更加灵活。`Lock` 是个**接口**，有个**实现类**是 `ReentrantLock`。
+
+### synchronized 与 Lock 的异同
+
+|  区别点  |            synchronized 关键词             |      Lock / ReentrantLock 接口       |
+| :------: | :----------------------------------------: | :----------------------------------: |
+|  锁类型  |                  可重入锁                  |               可重入锁               |
+|   用法   |          给 类、方法、代码块 加锁          |          只能给 代码块 加锁          |
+| 锁的取舍 | 不需要手动获取和释放锁，异常释放锁，无死锁 | 需要手动加锁和释放锁，处理不当会死锁 |
+|   实现   |                  基于 JVM                  |               基于 API               |
+
+### Lock / ReentrantLock 的高级功能
+
+#### 等待可中断
+
+
+
+#### 可实现公平锁
+
+
+
+#### 可实现选择性通知
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 6、变量：volatile 关键字
 
 ### 6.1 CPU 缓存模型
 
@@ -585,9 +630,17 @@ public class SynchronizedDemo2 {
 
 > volatile 关键字，在单例模式里有什么作用
 
-## 7、线程池
+## 7、变量：ThreadLocal
 
-### 7.1 使用线程池的原因
+`ThreadLocal`，即**线程本地变量**。
+
+如果创建了一个ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个本地拷贝，多个线程操作这个变量的时候，实际是操作自己本地内存里面的变量，从而起到线程隔离的作用，避免了线程安全问题。
+
+
+
+## 8、线程池
+
+### 8.1 使用线程池的原因
 
 > **池化技术** 的思想，在项目中已被广泛应用，比如数据库连接处、HTTP 连接池等等，池化技术的思想主要是为了减少每次获取资源的消耗，提供对资源的利用率。
 
@@ -601,7 +654,7 @@ public class SynchronizedDemo2 {
 - **提高响应速度**。当任务到达时，任务可以`不需要等到线程创建就能立即执行`。
 - **提高线程的可管理性**。线程是稀缺资源，如果无限制的创建，不仅会消耗系统资源，还会降低系统的稳定性，`使用线程池可以进行统一的分配，调优和监控` 。
 
-### 7.2 Executor 框架结构
+### 8.2 Executor 框架结构
 
 `Executor` 框架是 Java5 之后引进的，通过 `Executor` 来启动线程比使用 `Thread` 的 `start` 方法更好，除了更易管理，效率更好（用线程池实现，节约开销）外，还有关键的一点：有助于避免 this 逃逸问题。
 
@@ -639,7 +692,7 @@ public class SynchronizedDemo2 {
 > + `execute()`方法用于提交不需要返回值的任务，所以无法判断任务是否被线程池执行成功与否；
 > + `submit()`方法用于提交需要返回值的任务。线程池会返回一个 `Future` 类型的对象，通过这个 `Future` 对象可以判断任务是否执行成功，并且可以通过 `Future` 的 `get()`方法来获取返回值，`get()`方法会阻塞当前线程直到任务完成，而使用 `get(long timeout，TimeUnit unit)`方法则会阻塞当前线程一段时间后立即返回，这时候有可能任务没有执行完。
 
-### 7.3 线程池流程
+### 8.3 线程池流程
 
 #### Executor 的执行流程
 
@@ -657,7 +710,7 @@ public class SynchronizedDemo2 {
 
 ![image-20220727202905097](https://img.zxdmy.com/2022/202207272029608.png)
 
-### 7.4 ThreadPoolExecutor 类
+### 8.4 ThreadPoolExecutor 类
 
 > 线程池实现类 `ThreadPoolExecutor` 是 `Executor` 框架最核心的类。
 
@@ -704,10 +757,10 @@ public ThreadPoolExecutor(int corePoolSize,//线程池的核心线程数量
 5. **`unit`** ：`keepAliveTime` 参数的时间单位。
 6. **`threadFactory`** ：线程工厂，`executor` 创建新线程的时候会用到，一般默认即可。
 7. **`handler`** ：**饱和策略（拒绝策略）**，当提交的任务过多而不能及时处理时，定制策略来处理任务：
-  + `ThreadPoolExecutor.AbortPolicy` ：（默认策略）抛出 `RejectedExecutionException`来拒绝新任务的处理。
-  + `ThreadPoolExecutor.CallerRunsPolicy` ：（推荐使用）调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
-  + `ThreadPoolExecutor.DiscardPolicy` ：不处理新任务，直接丢弃掉。
-  + `ThreadPoolExecutor.DiscardOldestPolicy` ：此策略将丢弃最早的未处理的任务请求。
+    + `ThreadPoolExecutor.AbortPolicy` ：（默认策略）抛出 `RejectedExecutionException`来拒绝新任务的处理。
+    + `ThreadPoolExecutor.CallerRunsPolicy` ：（推荐使用）调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
+    + `ThreadPoolExecutor.DiscardPolicy` ：不处理新任务，直接丢弃掉。
+    + `ThreadPoolExecutor.DiscardOldestPolicy` ：此策略将丢弃最早的未处理的任务请求。
 
 > **不允许使用 `Executors` 去创建，而是通过 `ThreadPoolExecutor` 构造函数的方式创建线程池的原因：规避资源耗尽的风险**。
 >
@@ -893,7 +946,7 @@ Process finished with exit code 0
 >
 > https://zhuanlan.zhihu.com/p/510240849
 
-### 7.5 更多线程池（ThreadExecutor）
+### 8.5 更多线程池（ThreadExecutor）
 
 #### FixedThreadPool
 
@@ -967,17 +1020,116 @@ public static ExecutorService newCachedThreadPool(ThreadFactory threadFactory) {
 
 `CachedThreadPool`允许创建的线程数量为 `Integer.MAX_VALUE` ，可能会创建大量线程，从而导致 OOM。
 
-### 7.6 线程池大小确定
+### 8.6 线程池大小确定
 
 
 
 多线程同步怎么做？
 
-## 8、ThreadLocal 关键字
 
-`ThreadLocal`，即**线程本地变量**。
 
-如果创建了一个ThreadLocal变量，那么访问这个变量的每个线程都会有这个变量的一个本地拷贝，多个线程操作这个变量的时候，实际是操作自己本地内存里面的变量，从而起到线程隔离的作用，避免了线程安全问题。
+## 9、Fork & Join 框架
+
+#### 简介
+
+Fork/Join框架是Java7提供的一个用于并行执行任务的框架，是一个**把大任务分割成若干个小任务**，最终**汇总每个小任务结果后得到大任务结果**的框架。这体现出来的是 **分而治之** 特点。
+
+还有一个运行时的算法是 **工作窃取算法** ：把大任务拆分成小任务，放到不同队列执行，交由不同的线程分别执行时。有的线程优先把自己负责的任务执行完了，其他线程还在慢慢悠悠处理自己的任务，这时候为了充分提高效率，就需要工作盗窃算法，即 **某个线程从其他队列中窃取任务进行执行**，一般就是指做得快的线程（盗窃线程）抢慢的线程的任务来做，同时为了减少锁竞争，通常使用双端队列，即快线程和慢线程各在一端。
+
+![img](https://img.zxdmy.com/2022/202208151049925.png)
+
+#### 示例：打印斐波那契数列
+
+```java
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveTask;
+public class Fibonacci extends RecursiveTask<Integer>{
+
+    private int n;
+    public Fibonacci(int n) {
+        this.n = n;
+    }
+    @Override
+    protected Integer compute() {
+        if (n <= 1){
+            return n;
+        }
+        Fibonacci f1 = new Fibonacci(n - 1);
+        f1.fork();
+        Fibonacci f2 = new Fibonacci(n - 2);
+        f2.fork();
+        return f1.join() + f2.join();
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ForkJoinPool pool = new ForkJoinPool();
+        for (int i = 0; i< 10; i++) {
+            ForkJoinTask task = pool.submit(new Fibonacci(i));
+            System.out.println(task.get());
+        }
+    }
+}
+```
+
+## 10、CAS 同步原语
+
+#### 简介
+
+`CAS`：全称 `Compare and swap`，即**比较并交换**，它是一条 **CPU 同步原语**。
+
+CAS 是一种硬件对并发的支持，针对多处理器操作而设计的一种特殊指令，用于 **管理对共享数据的并发访问**。
+
+CAS 是一种 **无锁** 的 **非阻塞** 算法的实现。
+
+CAS 包含了 3 个**操作数**：
+
++ 需要读写的内存值 V
++ 旧的预期值 A
++ 要修改的更新值 B
+
+当且仅当 V 的值等于 A 时，CAS 通过原子方式用新值 B 来更新 V 的 值，否则不会执行任何操作（他的功能是判断内存某个位置的值是否为预期值，如果是则更改为新的值，这个过程是原子的）。
+
+CAS 并发原语体现在 Java 语言中的 `sum.misc.Unsafe` 类中的各个方法。调用 Unsafe 类中的 CAS 方法， JVM 会帮助我们实现出 CAS 汇编指令。这是一种完全依赖于硬件的功能，通过它实现了原子操作。再次强调，由于 CAS是一种系统原语，**原语属于操作系统用于范畴，是由若干条指令组成的，用于完成某个功能的一个过程，并且原语的执行必须是连续的**，**在执行过程中不允许被中断**，CAS 是一条 CPU 的原子指令，不会造成数据不一致问题。
+
+#### 缺陷与解决方法
+
+CAS 主要存在三个缺陷：
+
++ **ABA 问题**
+
+**问题描述**：
+
+并发环境下，假设初始条件是A，去修改数据时，发现是A就会执行修改。但是看到的虽然是A，中间可能发生了A变B，B又变回A的情况。此时A已经非彼A，数据即使成功修改，也可能有问题。
+
+**解决方案**：
+
+可以通过`AtomicStampedReference` **解决ABA问题**，它是一个带有标记的原子引用类，通过控制变量值的版本来保证CAS的正确性。
+
++ **循环时间长开销**
+
+**问题描述**：
+
+自旋CAS，如果一直循环执行，一直不成功，会给CPU带来非常大的执行开销。
+
+**解决方案**：
+
+很多时候，CAS思想体现，是有个自旋次数的，就是为了避开这个耗时问题~
+
++ **只能保证一个变量的原子操作**
+
+**问题描述**：
+
+CAS 保证的是对一个变量执行操作的原子性，如果对多个变量操作时，CAS 目前无法直接保证操作的原子性的。
+
+**解决方案**：
+
+1、使用互斥锁来保证原子性；
+
+2、将多个变量封装成对象，通过 `AtomicReference` 来保证原子性。
+
+
 
 
 
