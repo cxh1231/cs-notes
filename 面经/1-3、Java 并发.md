@@ -944,6 +944,8 @@ Thread-1生成的随机值为：4251
 
 > 上图的各个底层类关系中， `ThreadPoolExecutor` 类在实际使用线程池的过程中，使用频率非常高。
 
+> `Executors` 是一个工具类，不同的方法按照不同需求创建不同的线程池，来满足业务的需求。
+
 #### 结构3：异步计算的结果（Future）
 
 **`Future`** 接口以及 `Future` 接口的实现类 **`FutureTask`** 类都可以代表异步计算的结果。
@@ -974,6 +976,10 @@ Thread-1生成的随机值为：4251
 ![image-20220727202905097](https://img.zxdmy.com/2022/202207272029608.png)
 
 ![image-20220815162522421](https://img.zxdmy.com/2022/202208151625353.png)
+
+#### 线程池的线程复用
+
+源码中 ThreadPoolExecutor 中有个内置对象Worker，每个worker都是一个线程，worker线程数量和参数有关，每个worker会while死循环从阻塞队列中取数据，**通过置换worker中Runnable对象，运行其run方法起到线程置换的效果**，这样做的好处是避免多线程频繁线程切换，提高程序运行性能。
 
 ### 10.4 ThreadPoolExecutor 类
 
@@ -1213,6 +1219,10 @@ Process finished with exit code 0
 
 ### 10.5 更多线程池（ThreadExecutor）
 
+表格左侧是线程池，右侧为它们对应的阻塞队列， 5 种线程池对应了 3 种阻塞队列。
+
+![image-20220815163618386](https://img.zxdmy.com/2022/202208151636728.png)
+
 #### FixedThreadPool
 
 **实现源码：**
@@ -1285,9 +1295,27 @@ public static ExecutorService newCachedThreadPool(ThreadFactory threadFactory) {
 
 `CachedThreadPool`允许创建的线程数量为 `Integer.MAX_VALUE` ，可能会创建大量线程，从而导致 OOM。
 
-### 10.6 线程池大小确定
+### 10.6 线程池的 7 种阻塞队列
 
-自定义线程池就需要我们自己配置最大线程数 maximumPoolSize ，为了高效的并发运行，这时需要看我们的业务是IO密集型还是CPU密集型。
+关于阻塞队列：
+
+超出**核心线程数**的任务时，将任务加入在此任务**阻塞队列** 。
+
+当任务队列塞满时，创建新的线程执行任务，直到线程数达到**最大线程数**，触发**拒绝策略**。
+
+|        队列名称         |                 结构与读写                 |               大小               |
+| :---------------------: | :----------------------------------------: | :------------------------------: |
+| **ArrayBlockingQueue**  |   基于 **数组** 的 **先进先出** 有界队列   |            创建需指定            |
+| **LinkedBlockingQueue** | 基于 **链表** 的 **先进先出** 可选有界队列 | 默认 `Integer.MAX_VALUE`，可指定 |
+|  **SynchronousQueue**   |         **不存储元素** 的阻塞队列          |          0，插入会阻塞           |
+|  **DelayedWorkQueue**   |     基于 **堆(完全二叉树)** 的无界队列     |                                  |
+|  PriorityBlockingQueue  |       支持 **优先级排序** 的无界队列       |                                  |
+|   LinkedTransferQueue   |          基于 **链表** 的无界队列          |                                  |
+|   LinkedBlockingDeque   |       基于 **链表** 的 **双向** 队列       |                                  |
+
+### 10.7 线程池大小确定
+
+自定义线程池就需要我们自己配置最大线程数 `maximumPoolSize` ，为了高效的并发运行，这时需要看我们的业务是 **IO密集型** 还是 **CPU密集型**。
 
 #### IO 密集型
 
@@ -1395,9 +1423,11 @@ CAS 主要存在三个缺陷：
 
 并发环境下，假设初始条件是A，去修改数据时，发现是A就会执行修改。但是看到的虽然是A，中间可能发生了A变B，B又变回A的情况。此时A已经非彼A，数据即使成功修改，也可能有问题。
 
+换言之，第一个线程取到了变量 x 的值 A，然后巴拉巴拉干别的事，总之就是只拿到了变量 x 的值 A。这段时间内第二个线程也取到了变量 x 的值 A，然后把变量 x 的值改为 B，然后巴拉巴拉干别的事，最后又把变量 x 的值变为 A （相当于还原了）。在这之后第一个线程终于进行了变量 x 的操作，但是此时变量 x 的值还是 A，所以 compareAndSet 操作是成功。
+
 **解决方案**：
 
-可以通过`AtomicStampedReference` **解决ABA问题**，它是一个带有标记的原子引用类，通过控制变量值的版本来保证CAS的正确性。
+可以通过`AtomicStampedReference` **解决ABA问题**，它是一个带有标记的原子引用类，通过控制变量值的版本来保证CAS的正确性。（详见 [JUC包的原子类](#13、JUC 包的原子类（Atomic）)）
 
 + **循环时间长开销**
 
@@ -1420,4 +1450,216 @@ CAS 保证的是对一个变量执行操作的原子性，如果对多个变量�
 1、使用互斥锁来保证原子性；
 
 2、将多个变量封装成对象，通过 `AtomicReference` 来保证原子性。
+
+## 13、JUC 包的原子类（Atomic）
+
+#### 简介与类型
+
+`Atomic` 是指一个**操作是不可中断的**。即使是在多个线程一起执行的时候，一个操作一旦开始，就不会被其他线程干扰。
+
+所以，**所谓原子类说简单点就是具有原子 / 原子操作特征的类**。
+
+并发包 `java.util.concurrent` 的原子类都存放在 `java.util.concurrent.atomic` 下：
+
+![image-20220815190343685](https://img.zxdmy.com/2022/202208151903612.png)
+
+根据**操作的数据类型**，可以将 `JUC` 包中的**原子类**分为 4 类。
+
+**基本类型**：使用原子的方式更新基本类型
+
++ AtomicInteger：整型原子类
++ AtomicLong：长整型原子类
++ AtomicBoolean ：布尔型原子类
+
+**数组类型**：使用原子的方式更新数组里的某个元素
+
+- AtomicIntegerArray：整型数组原子类
+- AtomicLongArray：长整型数组原子类
+- AtomicReferenceArray ：引用类型数组原子类
+
+**引用类型**：
+
+- AtomicReference：引用类型原子类
+- AtomicMarkableReference：原子更新带有标记的引用类型。该类将 boolean 标记与引用关联起来。（不能解决 ABA 问题）
+- **AtomicStampedReference** ：原子更新带有版本号的引用类型。该类将整数值与引用关联起来，可用于解决原子的更新数据和数据的版本号，**可以解决使用 CAS 进行原子更新时可能出现的 ABA 问题**。
+
+**对象的属性修改类型**：
+
+- AtomicIntegerFieldUpdater:原子更新整型字段的更新器
+- AtomicLongFieldUpdater：原子更新长整型字段的更新器
+- AtomicReferenceFieldUpdater：原子更新引用类型里的字段
+
+#### 基本类型原子类的原理与使用示例
+
+AtomicInteger 类的部分源码如下：
+
+```java
+    // setup to use Unsafe.compareAndSwapInt for updates
+    //（更新操作时提供“比较并替换”的作用）
+    private static final Unsafe unsafe = Unsafe.getUnsafe();
+    private static final long valueOffset;
+
+    static {
+        try {
+            valueOffset = unsafe.objectFieldOffset
+                (AtomicInteger.class.getDeclaredField("value"));
+        } catch (Exception ex) { throw new Error(ex); }
+    }
+
+    private volatile int value;
+```
+
+`AtomicInteger` 类主要利用 `CAS` (compare and swap) + `volatile` 和 `native` 方法来保证原子操作，从而避免 `synchronized` 的高开销，执行效率大为提升。
+
+> CAS 的原理是拿期望的值和原本的一个值作比较，如果相同则更新成新的值。
+
+`UnSafe` 类的 `objectFieldOffset()` 方法是一个**本地方法**，这个方法是用来拿到“原来的值”的内存地址。
+
+另外 `value` 是一个 `volatile` 变量，在**内存中可见**，因此 JVM 可以**保证任何时刻任何线程总能拿到该变量的最新值**。
+
+下面是 **多线程环境使用基本数据类型原子类保证线程安全** 的示例：
+
+```java
+public class AtomicTest {
+
+    public static void main(String[] args) {
+        // 创建10000个线程，每个线程自增1，并且输出结果
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        Test test = new Test();
+        for (int i = 0; i < 100000; i++) {
+            new Thread(() -> {
+                // 自增
+                atomicInteger.incrementAndGet();
+                System.out.println(atomicInteger.get());
+            }).start();
+        }
+    }
+}
+```
+
+最终输出的结果是 **100000**。
+
+#### 引用类型原子类的使用示例
+
+`AtomicReference` 类使用示例：
+
+```java
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class AtomicReferenceTest {
+
+    public static void main(String[] args) {
+        AtomicReference<User> atomicReference = new AtomicReference<>();
+        // 创建线程池
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(20, 40, 1000L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100));
+        // 创建用户类
+        User user = new User(0, "name:" + 0);
+        atomicReference.set(user);
+        // 多个任务并发执行
+        for (int i = 1; i <= 100; i++) {
+            // 设置对象属性
+            user.setId(i);
+            user.setName("name:" + i);
+            // 添加至线程池并执行
+            threadPoolExecutor.execute(() -> atomicReference.compareAndSet(user, user));
+        }
+        threadPoolExecutor.shutdown();
+        while (!threadPoolExecutor.isTerminated()) {
+        }
+        // 输出结果
+        System.out.println(atomicReference.get().getName());
+    }
+}
+
+class User {
+    int id;
+    String name;
+    // 省略
+}
+```
+
+最终输出结果：`name:100` 。
+
+如果将for 循环里的代码修改为如下：
+
+```java
+// 设置对象属性
+// user.setId(i);
+// user.setName("name:" + i);
+User newUser = new User(i, "name:" + i);
+// 创建一个线程并添加至线程池
+threadPoolExecutor.execute(() -> atomicReference.compareAndSet(user, newUser));
+```
+
+则输出结果为：`name:1` 。
+
+因为在第 `1` 次循环时，引用原子类 `atomicReference` 内的 `User` 的值为 `user`，与方法 `compareAndSet(user, newUser)` 的第一个值 `user` 匹配成功，则执行方法，将原子类 的 `User` 值设置为 `newUser` 。
+
+在第 `2` 次及以后的循环中，引用原子类内的 `User` 值为 `newUser`，与方法 `compareAndSet(user, newUser)` 的第一个参数匹配失败，无法执行该方法。
+
+#### 对象的属性修改类型原子类的使用示例
+
+要想原子地更新对象的属性需要两步。
+
+第一步，因为 **对象的属性修改类型原子类** 都是抽象类，所以每次使用都必须使用静态方法 `newUpdater()` 创建一个更新器，并且需要**设置想要更新的类和属性**。
+
+第二步，**更新的对象属性**必须使用 `public volatile` 修饰符。
+
+示例如下：
+
+```java
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+public class AtomicIntegerFieldUpdaterTest {
+    public static void main(String[] args) {
+        AtomicIntegerFieldUpdater<People> atomicIntegerFieldUpdater = AtomicIntegerFieldUpdater.newUpdater(People.class, "age");
+        People people = new People("张三", 18);
+
+        System.out.println(atomicIntegerFieldUpdater.incrementAndGet(people)); // 19
+        System.out.println(people.getAge()); // 19
+        System.out.println(atomicIntegerFieldUpdater.getAndIncrement(people));// 19
+        System.out.println(people.getAge()); // 20
+        System.out.println(atomicIntegerFieldUpdater.addAndGet(people, 5));// 25
+
+        atomicIntegerFieldUpdater.compareAndSet(people, 20, 30);
+        System.out.println(people.getAge()); // 25
+
+        atomicIntegerFieldUpdater.compareAndSet(people, 25, 35);
+        System.out.println(people.getAge()); // 35
+    }
+}
+
+class People {
+    private String name;
+    public volatile int age;
+
+    // 以下省略
+}
+```
+
+## 14、JUC包的 AQS
+
+#### 简介
+
+`AQS` 的全称为 `AbstractQueuedSynchronizer` ，翻译过来的意思就是**抽象队列同步器**。这个类在 `java.util.concurrent.locks` 包下面。
+
+![image-20220815202754761](https://img.zxdmy.com/2022/202208152027352.png)
+
+`AQS` 就是一个**抽象类**，主要 **用来构建锁和同步器**。
+
+```java
+public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchronizer implements java.io.Serializable {
+}
+```
+
+`AQS` 为构建锁和同步器提供了一些通用功能的是实现，因此，使用 AQS 能简单且高效地构造出应用广泛的大量的同步器，比如前文的 `ReentrantLock`，`Semaphore`，其他的诸如 `ReentrantReadWriteLock`，`SynchronousQueue`，`FutureTask` (jdk1.7) 等等皆是基于 AQS 的。
+
+#### 原理
+
+AQS 核心思想是，如果被请求的共享资源空闲，则将当前请求资源的线程设置为有效的工作线程，并且将共享资源设置为锁定状态。如果被请求的共享资源被占用，那么就需要一套线程阻塞等待以及被唤醒时锁分配的机制，这个机制 AQS 是用 **CLH 队列锁**实现的，即将暂时获取不到锁的线程加入到队列中。
+
+![image-20220815202958637](https://img.zxdmy.com/2022/202208152029944.png)
 
