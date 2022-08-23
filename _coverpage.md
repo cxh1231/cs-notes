@@ -10,4 +10,4 @@
 
 [研发社区](https://gitee.com/geekrdc)
 
-[开启笔记](/index/)
+[//]: # ([开启笔记]&#40;/index/&#41;)
