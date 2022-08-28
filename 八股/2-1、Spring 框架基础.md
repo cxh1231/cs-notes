@@ -657,7 +657,6 @@ public class LoggingAspect implements Ordered {
 | **MANDATORY** (*mandatory*) |               加入当前事务               |     抛出异常     |
 |    **NESTED** (*nested*)    | 创建一个事务作为当前事务的嵌套事务来运行 | 创建一个新的事务 |
 |            NEVER            |                 抛出异常                 | 以非事务方式运行 |
-|                             |                                          |                  |
 
 使用示例：
 
@@ -679,7 +678,7 @@ public int saveRole(SysRole role, Integer[] menusIds) {
 - repeatable_read：可重复的
 - serializable：串行化
 
-## 9、Spring 框架中用到的设计模式
+## 7、Spring 框架中用到的设计模式
 
 - **工厂设计模式** : Spring 使用工厂模式通过 `BeanFactory`、`ApplicationContext` 创建 bean 对象。
 - **代理设计模式** : Spring AOP 功能的实现。

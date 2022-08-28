@@ -1,5 +1,3 @@
-
-
 ## 1、使用 Spring Boot 的原因
 
 ### 1.1 Spring 的不足
@@ -35,7 +33,7 @@ Spring Boot  旨在简化 Spring 开发（减少配置文件，开箱即用！�
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(excludeFilters = { @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
-		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
 public @interface SpringBootApplication {
     ……
 }
@@ -50,10 +48,10 @@ public @interface SpringBootApplication {
 @Configuration
 @Indexed
 public @interface SpringBootConfiguration {
-    @AliasFor(
-        annotation = Configuration.class
-    )
-    boolean proxyBeanMethods() default true;
+  @AliasFor(
+          annotation = Configuration.class
+  )
+  boolean proxyBeanMethods() default true;
 }
 ```
 

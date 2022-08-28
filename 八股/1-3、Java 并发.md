@@ -1,3 +1,7 @@
+> https://javaguide.cn/java/concurrent/java-concurrent-questions-01.html
+>
+> [https://www.javalearn.cn/#/doc/Java并发/面试题](https://www.javalearn.cn/#/doc/Java并发/面试题)
+
 ## 1、线程与进程的基本概念
 
 ### 1.1 进程与线程
@@ -47,7 +51,7 @@
 
 它独立于控制终端并且周期性地执行某种任务或等待处理某些发生的事件。
 
-在 Java 中垃圾回收线程就是特殊的守护线程。
+在 Java 中 **垃圾回收线程** 就是特殊的守护线程。
 
 ## 2、线程的状态与生命周期
 
@@ -805,6 +809,8 @@ class ThreadB extends Thread {
 **`volatile` 关键字可以防止 JVM 的指令重排序。**
 
 即：将变量声明为 **`volatile`** ，在对这个变量进行读写操作的时候，编译器会通过 **内存屏障** 来禁止指令重排序。
+
+> `volatile` 不能保证原子性！
 
 > volatile 关键字，在单例模式里有什么作用
 
@@ -1662,4 +1668,3 @@ public abstract class AbstractQueuedSynchronizer extends AbstractOwnableSynchron
 AQS 核心思想是，如果被请求的共享资源空闲，则将当前请求资源的线程设置为有效的工作线程，并且将共享资源设置为锁定状态。如果被请求的共享资源被占用，那么就需要一套线程阻塞等待以及被唤醒时锁分配的机制，这个机制 AQS 是用 **CLH 队列锁**实现的，即将暂时获取不到锁的线程加入到队列中。
 
 ![image-20220815202958637](https://img.zxdmy.com/2022/202208152029944.png)
-

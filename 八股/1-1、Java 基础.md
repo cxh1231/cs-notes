@@ -1,5 +1,6 @@
-+ [Java 基础知识](#_1、java-基础知识)
-
+> https://javaguide.cn/java/basis/java-basic-questions-01.html
+>
+> [https://www.javalearn.cn/#/doc/Java基础/面试题](https://www.javalearn.cn/#/doc/Java基础/面试题)
 
 ## 1、Java 基础知识
 
@@ -192,34 +193,34 @@ User.java：
 ```java
 public class User {
 
-   public String name;
+    public String name;
 
-   // 构造代码块
-   {
-      name = "张三";
-      System.out.println("User：构造代码块");
-   }
+    // 构造代码块
+    {
+        name = "张三";
+        System.out.println("User：构造代码块");
+    }
 
-   // 无参构造代码块
-   public User() {
-      System.out.println("User：无参构造代码块");
-   }
+    // 无参构造代码块
+    public User() {
+        System.out.println("User：无参构造代码块");
+    }
 
-   // 有参构造代码块
-   public User(String name) {
-      this.name = name;
-      System.out.println("User：有参构造代码块");
-   }
+    // 有参构造代码块
+    public User(String name) {
+        this.name = name;
+        System.out.println("User：有参构造代码块");
+    }
 
-   // 静态代码块
-   static {
-      System.out.println("User：静态代码块");
-   }
+    // 静态代码块
+    static {
+        System.out.println("User：静态代码块");
+    }
 
-   // 普通代码块
-   public String getName() {
-      return name;
-   }
+    // 普通代码块
+    public String getName() {
+        return name;
+    }
 }
 ```
 
@@ -227,26 +228,26 @@ public class User {
 
 ```java
 public class Main {
-   public static void main(String[] args) {
-      User user = new User("用户李四");
-      System.out.println(user.getName());
+    public static void main(String[] args) {
+        User user = new User("用户李四");
+        System.out.println(user.getName());
 
-      System.out.println("----------");
+        System.out.println("----------");
 
-      User user2 = new User();
-      System.out.println(user2.getName());
-   }
+        User user2 = new User();
+        System.out.println(user2.getName());
+    }
 }
 /**
- User：静态代码块
- User：构造代码块
- User：有参构造代码块
- 用户李四
- ----------
- User：构造代码块
- User：无参构造代码块
- 张三
- */
+User：静态代码块
+User：构造代码块
+User：有参构造代码块
+用户李四
+----------
+User：构造代码块
+User：无参构造代码块
+张三
+*/
 ```
 
 继承中代码块执行顺序：**父类静态块 —> 子类静态块 —> 父类代码块 —> 父类构造器 —> 子类代码块 —> 子类构造器**，示例如下：
@@ -256,27 +257,27 @@ public class Main {
 ```java
 public class Student extends User {
 
-   // 构造代码块
-   {
-      name = "李四";
-      System.out.println("Student：构造代码块");
-   }
+    // 构造代码块
+    {
+        name = "李四";
+        System.out.println("Student：构造代码块");
+    }
 
-   // 无参构造代码块
-   public Student() {
-      System.out.println("Student：无参构造代码块");
-   }
+    // 无参构造代码块
+    public Student() {
+        System.out.println("Student：无参构造代码块");
+    }
 
-   // 有参构造代码块
-   public Student(String name) {
-      System.out.println("Student：有参构造代码块");
-   }
+    // 有参构造代码块
+    public Student(String name) {
+        System.out.println("Student：有参构造代码块");
+    }
 
 
-   // 静态代码块
-   static {
-      System.out.println("Student：静态代码块");
-   }
+    // 静态代码块
+    static {
+        System.out.println("Student：静态代码块");
+    }
 }
 ```
 
@@ -284,31 +285,31 @@ public class Student extends User {
 
 ```java
 public class Main {
-   public static void main(String[] args) {
-      Student student = new Student("学生王五");
-      System.out.println(student.getName());
+    public static void main(String[] args) {
+        Student student = new Student("学生王五");
+        System.out.println(student.getName());
 
-      System.out.println("----------");
+        System.out.println("----------");
 
-      Student student2 = new Student();
-      System.out.println(student2.getName());
-   }
+        Student student2 = new Student();
+        System.out.println(student2.getName());
+    }
 }
 /**
- User：静态代码块
- Student：静态代码块
- User：构造代码块
- User：无参构造代码块
- Student：构造代码块
- Student：有参构造代码块
- 学生王五
- ----------
- User：构造代码块
- User：无参构造代码块
- Student：构造代码块
- Student：无参构造代码块
- 李四
- */
+User：静态代码块
+Student：静态代码块
+User：构造代码块
+User：无参构造代码块
+Student：构造代码块
+Student：有参构造代码块
+学生王五
+----------
+User：构造代码块
+User：无参构造代码块
+Student：构造代码块
+Student：无参构造代码块
+李四
+*/
 ```
 
 ## 3、数据类型
@@ -362,22 +363,22 @@ Java 基本类型的包装类的大部分都实现了常量池技术。
 
 ```java
 Integer a = 33;
-        Integer b1 = 33;
-        Integer b2 = new Integer(33);
-        System.out.println(a == b1); // true
-        System.out.println(a == b2); // false
-        Integer c = 1024;
-        Integer d = 1024;
-        System.out.println(c == d); // false
-        System.out.println(c.equals(d)); // true
+Integer b1 = 33;
+Integer b2 = new Integer(33);
+System.out.println(a == b1); // true
+System.out.println(a == b2); // false
+Integer c = 1024;
+Integer d = 1024;
+System.out.println(c == d); // false
+System.out.println(c.equals(d)); // true
 
-        Float i1 = 333f;
-        Float i2 = 333f;
-        System.out.println(i1 == i2); // false
+Float i1 = 333f;
+Float i2 = 333f;
+System.out.println(i1 == i2); // false
 
-        Double i3 = 1.2;
-        Double i4 = 1.2;
-        System.out.println(i3 == i4); // false
+Double i3 = 1.2;
+Double i4 = 1.2;
+System.out.println(i3 == i4); // false
 ```
 
 下图是阿里巴巴Java开发手册给出的说明。
@@ -391,7 +392,7 @@ Integer a = 33;
 
 ```java
 Integer i = 10; //装箱
-        int n = i;   	//拆箱
+int n = i;   	//拆箱
 ```
 
 即：
@@ -449,7 +450,7 @@ Object 类是一个特殊的类，是所有类的父类。它主要提供了以�
 ```java
 // native 方法，用于返回当前运行时对象的 Class 对象，使用了 final 关键字修饰，故不允许子类重写。
 public final native Class<?> getClass();
-
+    
 // native 方法，用于返回对象的哈希码，主要使用在哈希表中，比如 JDK 中的HashMap。
 public native int hashCode();
 
